@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityStandardAssets.CrossPlatformInput;
 
 
 [RequireComponent(typeof(CharacterBehavior))]
@@ -16,8 +17,9 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-        character.Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-
+        character.Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"),
+            Input.GetAxis("Dash") < 0 ? true:false);
+        //print("DASH: " + CrossPlatformInputManager.GetAxis("Dash"));
         
 	}
 }

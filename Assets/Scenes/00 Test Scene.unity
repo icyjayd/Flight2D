@@ -113,25 +113,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &208250711 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 100004, guid: 57977547c59abb546bbb1501e3c417db,
-    type: 2}
-  m_PrefabInternal: {fileID: 626645218}
---- !u!114 &208250712
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 208250711}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c597d5e1f0f3bb44bde44bb03888951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  xSpeed: 10
-  ySpeed: 10
-  facingRight: 0
 --- !u!1001 &626645218
 Prefab:
   m_ObjectHideFlags: 0
@@ -211,6 +192,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xSpeed: 10
   ySpeed: 10
+  dashModifier: 2
   facingRight: 1
 --- !u!1001 &1190839800
 Prefab:
@@ -262,6 +244,10 @@ Prefab:
     - target: {fileID: 5000000, guid: 87a2357765801c34292d6718d8b4d770, type: 2}
       propertyPath: m_GravityScale
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: 87a2357765801c34292d6718d8b4d770, type: 2}
+      propertyPath: m_Controller
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 11400000, guid: 87a2357765801c34292d6718d8b4d770, type: 2}
@@ -354,12 +340,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1566817045}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9dfad760b6e9455593192a6d869f7ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 7648a705a1715cb4291452add9369364, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   xMargin: 1
   yMargin: 1
-  xSmooth: 8
-  ySmooth: 8
+  xSmooth: 4
+  ySmooth: 4
   maxXAndY: {x: 1000, y: 1000}
-  minXAndY: {x: -1000, y: -1000}
+  minXAndY: {x: -10000, y: -1000}

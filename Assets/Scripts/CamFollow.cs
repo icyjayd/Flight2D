@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameFollow : MonoBehaviour
+public class CamFollow : MonoBehaviour
 {
     public float xMargin = 1f; // Distance in the x axis the player can move before the camera follows.
     public float yMargin = 1f; // Distance in the y axis the player can move before the camera follows.
@@ -64,7 +64,7 @@ public class CameFollow : MonoBehaviour
         // The target x and y coordinates should not be larger than the maximum or smaller than the minimum.
         targetX = Mathf.Clamp(targetX, minXAndY.x, maxXAndY.x);
         targetY = Mathf.Clamp(targetY, minXAndY.y, maxXAndY.y);
-
+       
         // Set the camera's position to the target position with the same z component.
         transform.position = new Vector3(targetX, targetY, transform.position.z);
     }

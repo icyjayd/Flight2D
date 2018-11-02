@@ -5,7 +5,9 @@ using UnityEngine;
 public class CharacterBehavior : MonoBehaviour {
     public float xSpeed = 10; //speed moving left and right
     public float ySpeed = 10;// speed moving up and down
+    public float dashModifier = 2; //speed increase by dashing
     public bool facingRight;
+    bool dashing;
     Rigidbody2D rb;
 
     // Use this for initialization
@@ -13,10 +15,10 @@ public class CharacterBehavior : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
 
     }
-    public void Move(float moveX, float moveY)
+    public void Move(float moveX, float moveY, bool dashing = false)
     {
-        rb.velocity = new Vector2 (moveX * xSpeed, moveY * ySpeed);
 
+        rb.velocity = new Vector2 (moveX * xSpeed, moveY * ySpeed) * ((dashing) ? dashModifier:1);
 
         // If the input is moving the player right and the player is facing left...
         if (moveX > 0 && !facingRight)
