@@ -10,14 +10,21 @@ public class CamFollow : MonoBehaviour
     public float ySmooth = 8f; // How smoothly the camera catches up with it's target movement in the y axis.
     public Vector2 maxXAndY; // The maximum x and y coordinates the camera can have.
     public Vector2 minXAndY; // The minimum x and y coordinates the camera can have.
-
+    Vector3 velocity = Vector3.zero;
     private Transform player; // Reference to the player's transform.
+    Vector2 playerPos;
+    Vector3 camPos;
+    private Rigidbody2D playerRB;
+    public float smoothTime = 1;
 
 
     private void Awake()
     {
         // Setting up the reference.
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        playerRB = player.GetComponent<Rigidbody2D>();
+        playerPos = player.position;
+        camPos = transform.position;
     }
 
 
@@ -34,13 +41,22 @@ public class CamFollow : MonoBehaviour
         return Mathf.Abs(transform.position.y - player.position.y) > yMargin;
     }
 
-
     private void Update()
     {
+        camPos = transform.position;
+        playerPos = player.position;
+
+
+    }
+    private void FixedUpdate() { 
         TrackPlayer();
+
+    
     }
 
-
+    private void Follow() {
+        transform.position = Vector3.SmoothDamp(transform.position, player.position, ref velocity, smoothTime);
+    }
     private void TrackPlayer()
     {
         // By default the target x and y coordinates of the camera are it's current x and y coordinates.
@@ -51,14 +67,14 @@ public class CamFollow : MonoBehaviour
         if (CheckXMargin())
         {
             // ... the target x coordinate should be a Lerp between the camera's current x position and the player's current x position.
-            targetX = Mathf.Lerp(transform.position.x, player.position.x, xSmooth * Time.deltaTime);
+            targetX = Mathf.Lerp(camPos.x, playerPos.x, xSmooth * Time.deltaTime);
         }
 
         // If the player has moved beyond the y margin...
         if (CheckYMargin())
         {
             // ... the target y coordinate should be a Lerp between the camera's current y position and the player's current y position.
-            targetY = Mathf.Lerp(transform.position.y, player.position.y, ySmooth * Time.deltaTime);
+            targetY = Mathf.Lerp(camPos.y, playerPos.y, ySmooth * Time.deltaTime);
         }
 
         // The target x and y coordinates should not be larger than the maximum or smaller than the minimum.

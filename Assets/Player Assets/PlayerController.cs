@@ -14,11 +14,15 @@ public class PlayerController : MonoBehaviour {
     public PlayerState currentState;
     //public PlayerButton currentButton;
     [SerializeField]
+    private Vector3 weaponStart, weaponEnd;
+    [SerializeField]
     public List<Action> actionList;
     [SerializeField]
     bool detectingInputs = true;
     public List<PlayerButton> buttonList;
     public float timeSinceLastAction;
+    private float moveX, moveY, dash;
+    public Weapon weapon;
     Animator animator;
     // Use this for initialization
     void Start () {
@@ -28,7 +32,9 @@ public class PlayerController : MonoBehaviour {
         timeSinceLastAction = 0;
         buttonList = new List<PlayerButton>();
         animator = GetComponent<Animator>();
-	}
+        weapon = GetComponentInChildren<Weapon>();
+        weapon.transform.localPosition = weaponStart;
+    }
 
     private void Update()
     {
@@ -38,19 +44,36 @@ public class PlayerController : MonoBehaviour {
             buttonList = GetButtons();
         }
         UpdateActions(buttonList);
+
+        if (CrossPlatformInputManager.GetButtonDown("Attack"))
+        {
+            Attack();
+
+        }
+        moveX = CrossPlatformInputManager.GetAxisRaw("Horizontal");
+        moveY = CrossPlatformInputManager.GetAxisRaw("Vertical");
+        dash = CrossPlatformInputManager.GetAxisRaw("Dash");
+
+        //print(CrossPlatformInputManager.GetButtonDown("Attack"));
         //foreach (action a in actionlist)
         //{
         //    print(a.actiontype.tostring() + actionlist.indexof(a));
         //}
+
     }
     // Update is called once per frame
     void FixedUpdate() {
-        character.Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"),
-            Input.GetAxis("Dash") < 0 ? true : false);
+
+        character.Move(moveX, moveY, dash < 0 ? true : false);
+
         //print("DASH: " + CrossPlatformInputManager.GetAxis("Dash"));
 
     }
-    
+
+    void Attack()
+    {
+       StartCoroutine(character.Swing(weapon, weaponStart, weaponEnd, .5f));
+    }
 
     //get buttons
     //compare button to state
