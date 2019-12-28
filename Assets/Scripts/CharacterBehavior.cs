@@ -5,6 +5,9 @@ using UnityEngine;
 /// This class is meant to have actions which are usable by all characters, such as movement, attack, and basic rigidbody initialization.
 /// </summary>
 public class CharacterBehavior : MonoBehaviour {
+    [SerializeField]
+    private float speedBuffer = 500;
+
     public float xSpeed = 10; //speed moving left and right
     public float ySpeed = 10;// speed moving up and down
     public float dashModifier = 2; //speed increase by dashing
@@ -13,6 +16,7 @@ public class CharacterBehavior : MonoBehaviour {
     bool dashing;
     public Rigidbody2D rb;
     public GameManager gm;
+  
     SpriteRenderer sp;
     Vector2 velocity = Vector2.zero;
     // Use this for initialization
@@ -22,15 +26,11 @@ public class CharacterBehavior : MonoBehaviour {
         sp = GetComponent<SpriteRenderer>();
 
     }
-    public virtual void Move(float moveX, float moveY, bool dashing = false, ForceMode2D force = ForceMode2D.Force)
+    public virtual void Move(float moveX, float moveY, float dash = 1)
     {
-        Vector3 currentPosition = new Vector3(transform.position.x, transform.position.y, 0);
+        rb.velocity = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
 
-      //  print(moveX);
-        rb.AddForce(new Vector2(moveX * xSpeed, moveY * ySpeed) * Time.deltaTime);
-//        cc.velocity = Vector2.SmoothDamp(cc.velocity, cc.velocity + new Vector2(moveX * xSpeed, moveY * ySpeed), ref velocity, smoothing);
-//        rb.MovePosition(currentPosition + new Vector2 (moveX * xSpeed, moveY * ySpeed) * ((dashing) ? dashModifier:1) * Time.deltaTime);
-///TODO: CHANGE RB TO CHARCON
+
         // If the input is moving the player right and the player is facing left...
         FlipCheck(moveX);
     }

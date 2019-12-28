@@ -6,6 +6,13 @@ public class Enemy : CharacterBehavior {
 
     public Transform playerTransform;
     Vector3 dir;
+    Vector3 dist;
+    private float moveX = 0, moveY = 0;
+    private bool watching = true;
+    [SerializeField]
+    private float minDist = 1;
+    [SerializeField]
+    private float acceleration = 1.1f;
     // Use this for initialization
     new void Start () {
         base.Start();
@@ -15,32 +22,56 @@ public class Enemy : CharacterBehavior {
 
     private void Update()
     {
-        dir = playerTransform.position.normalized - transform.position.normalized;
+        dir = playerTransform.position - transform.position;
+        if (Helpers.CheckBoundary(dir.x, minDist) == false)
+        {
+            moveX = Mathf.Clamp(moveX + Helpers.Sign(dir.x) * Time.deltaTime * acceleration,xSpeed * -1, xSpeed);
+        }
+        else
+        {
+            moveX = 0;
+        }
+        if (Helpers.CheckBoundary(dir.y, minDist) == false)
+        {
+            moveY = Mathf.Clamp(moveY + Helpers.Sign(dir.y) * Time.deltaTime * acceleration, ySpeed * -1, ySpeed);
+        }
+        else
+        {
+            moveY = 0;
+        }
+        // print(moveX);
     }
     // Update is called once per frame
     void FixedUpdate () {
-        Approach();
-	}
+        Move(moveX, moveY);
+
+
+
+    }
 
     public override void FlipCheck(float moveX)
     {
-        if (dir.x > 0 && !facingRight)
+        if (watching)
         {
-            // ... flip the player.
-            Flip();
+
+            if (dir.x > 0 && !facingRight)
+            {
+                // ... flip the player.
+                Flip();
+            }
+            // Otherwise if the input is moving the player left and the player is facing right...
+            else if (dir.x < 0 && facingRight)
+            {
+                // ... flip the player.
+                Flip();
+            }
         }
-        // Otherwise if the input is moving the player left and the player is facing right...
-        else if (dir.x < 0 && facingRight)
-        {
-            // ... flip the player.
-            Flip();
-        }
+        
     }
 
 
     public virtual void Approach() {
         
-        Move(dir.x, dir.y);
     }
 
 
