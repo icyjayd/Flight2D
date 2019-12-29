@@ -16,7 +16,9 @@ public class CharacterBehavior : MonoBehaviour {
     bool dashing;
     public Rigidbody2D rb;
     public GameManager gm;
-  
+    float distance = 0;
+    RaycastHit2D[] hit = new RaycastHit2D[1];
+ 
     SpriteRenderer sp;
     Vector2 velocity = Vector2.zero;
     // Use this for initialization
@@ -28,8 +30,25 @@ public class CharacterBehavior : MonoBehaviour {
     }
     public virtual void Move(float moveX, float moveY, float dash = 1)
     {
-        rb.velocity = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
-
+        Vector2 pos = new Vector2(transform.position.x, transform.position.y);
+        Vector2 dir = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
+        distance = dir.magnitude;
+        int results = rb.Cast(dir.normalized, hit, dir.magnitude * 4 - 0.01f);
+        if (results > 0)
+        {
+            //print("detected");
+            distance = hit[0].fraction * dir.normalized.magnitude;
+        }
+        // rb.velocity = dir ;
+        if (distance < 0.01f)
+        {
+            distance = 0;
+            //rb.velocity = Vector2.zero;
+        }
+        rb.MovePosition(pos + dir * distance);
+        //Collider2D[] cols = 
+        //rb.velocity = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
+        // rb.AddForce(new Vector2(moveX, moveY));
 
         // If the input is moving the player right and the player is facing left...
         FlipCheck(moveX);

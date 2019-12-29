@@ -45,14 +45,18 @@ public class CamFollow : MonoBehaviour
     {
         camPos = transform.position;
         playerPos = player.position;
-        TrackPlayer();
 
 
     }
-    private void FixedUpdate() { 
-        
+    private void FixedUpdate() {
 
-    
+
+
+    }
+    private void LateUpdate()
+    {
+        TrackPlayer();
+
     }
 
     private void Follow() {
