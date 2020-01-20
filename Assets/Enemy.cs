@@ -23,17 +23,17 @@ public class Enemy : CharacterBehavior {
     private void Update()
     {
         dir = playerTransform.position - transform.position;
-        if (Helpers.CheckBoundary(dir.x, minDist) == false)
+        if (HelperFunctions.CheckBoundary(dir.x, minDist) == false)
         {
-            moveX = Mathf.Clamp(moveX + Helpers.Sign(dir.x) * Time.deltaTime * acceleration,xSpeed * -1, xSpeed);
+            moveX = Mathf.Clamp(moveX + HelperFunctions.Sign(dir.x) * Time.deltaTime * acceleration,xSpeed * -1, xSpeed);
         }
         else
         {
             moveX = 0;
         }
-        if (Helpers.CheckBoundary(dir.y, minDist) == false)
+        if (HelperFunctions.CheckBoundary(dir.y, minDist) == false)
         {
-            moveY = Mathf.Clamp(moveY + Helpers.Sign(dir.y) * Time.deltaTime * acceleration, ySpeed * -1, ySpeed);
+            moveY = Mathf.Clamp(moveY + HelperFunctions.Sign(dir.y) * Time.deltaTime * acceleration, ySpeed * -1, ySpeed);
         }
         else
         {

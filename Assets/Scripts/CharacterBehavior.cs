@@ -26,7 +26,6 @@ public class CharacterBehavior : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
         gm = FindObjectOfType<GameManager>();
         sp = GetComponent<SpriteRenderer>();
-
     }
     public virtual void Move(float moveX, float moveY, float dash = 1)
     {
