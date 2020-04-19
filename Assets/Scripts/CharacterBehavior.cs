@@ -18,19 +18,26 @@ public class CharacterBehavior : MonoBehaviour {
     public GameManager gm;
     float distance = 0;
     RaycastHit2D[] hit = new RaycastHit2D[1];
+    Weapon weapon;
  
     SpriteRenderer sp;
     Vector2 velocity = Vector2.zero;
     // Use this for initialization
+
+    //possibly temporary variables for setup
+    float weaponBufferX;
+
     public void Start () {
         rb = GetComponent<Rigidbody2D>();
         gm = FindObjectOfType<GameManager>();
         sp = GetComponent<SpriteRenderer>();
+        weapon = GetComponentInChildren<Weapon>();
+        weaponBufferX = weapon.transform.position.x - transform.position.x;
     }
-    public virtual void Move(float moveX, float moveY, float dash = 1)
+    public virtual void Move(Vector2 input, float dash = 1)
     {
         Vector2 pos = new Vector2(transform.position.x, transform.position.y);
-        Vector2 dir = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
+        Vector2 dir = input * dash * speedBuffer * Time.fixedDeltaTime;
         distance = dir.magnitude;
         int results = rb.Cast(dir.normalized, hit, dir.magnitude * 4 - 0.01f);
         if (results > 0)
@@ -50,7 +57,7 @@ public class CharacterBehavior : MonoBehaviour {
         // rb.AddForce(new Vector2(moveX, moveY));
 
         // If the input is moving the player right and the player is facing left...
-        FlipCheck(moveX);
+        FlipCheck(input.x);
     }
 
     public virtual void FlipCheck(float moveX)
@@ -68,6 +75,9 @@ public class CharacterBehavior : MonoBehaviour {
         }
 
 
+    }
+    public void Attack() {
+        weapon.anim.SetTrigger("Attack");
     }
     public virtual IEnumerator Swing(Weapon weapon, Vector3 start, Vector3 end, float totalTime = .5f) {
         //update the position of weapon to the endpoint of the swing and let it rest there for the total time
@@ -98,8 +108,16 @@ public class CharacterBehavior : MonoBehaviour {
         // Switch the way the player is labelled as facing.
         facingRight = !facingRight;
         sp.flipX = !sp.flipX;
+        weapon.sp.flipX = !weapon.sp.flipX;
+        Debug.Log("before:" + weapon.transform.position.x.ToString());
+        weaponBufferX = weaponBufferX * -1;
+        // weapon.transform.localPosition = new Vector3(1, 0, 0);
+        //weapon.transform.position = new Vector3(transform.position.x + weaponBufferX, weapon.transform.position.y, weapon.transform.position.z);
+        weapon.transform.localPosition = new Vector3(weapon.transform.localPosition.x * -1, weapon.transform.localPosition.y, weapon.transform.localPosition.z);
+        Debug.Log("after:" + weapon.transform.position.x.ToString());
+
         // Multiply the player's x local scale by -1.
-       // Vector3 theScale = transform.localScale;
+        // Vector3 theScale = transform.localScale;
         //theScale.x *= -1;
         //transform.localScale = theScale;
     }

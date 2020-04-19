@@ -5,16 +5,33 @@ using UnityStandardAssets.CrossPlatformInput;
 //using Helpers;
 
 public class PlayerController : MonoBehaviour {
-    private float xMove, yMove;
+    private Vector2 movement;
     private bool dash;
     Action lastMove;
     Rigidbody2D rb;
     private CharacterBehavior cb;
     public float inputThreshold = .2f;
-    [SerializeField]
+    //
     public Queue<Action> inputBuffer;
+    public InputMaster controls;
 
-    void Start () {
+    private void Awake()
+    {
+        controls = new InputMaster();
+        controls.Player.Attack.performed += ctx => Attack();
+        controls.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
+    }
+
+    void OnEnable()
+    {
+        controls.Enable();
+    }
+    private void OnDisable()
+    {
+        controls.Disable();
+    }
+    void Start ()
+    {
         rb = GetComponent<Rigidbody2D>();
         cb = GetComponent<CharacterBehavior>();
         inputBuffer = new Queue<Action>();
@@ -57,32 +74,48 @@ public class PlayerController : MonoBehaviour {
             }
         }
     }
+    public void Attack()
+    {
+        cb.Attack();
+
+    }
+
+    public void Move(Vector2 dir)
+    {
+        Debug.Log(dir);
+        movement = dir;
+    }
+
     private void Update()
     {
-        UpdateBuffer();
-
-        xMove = CrossPlatformInputManager.GetAxis("Horizontal");
-        if (xMove != 0)
-        {
-            ProcessInput(new Action("xMove", Time.time, xMove));
 
 
-        }
-        yMove = CrossPlatformInputManager.GetAxis("Vertical");
-        if(yMove != 0)
-        {
-            ProcessInput(new Action("yMove", Time.time, yMove));
+        //updatebuffer();
 
-        }
+        //float xmove = CrossPlatformInputManager.GetAxis("Horizontal");
+        //if (xmove != 0)
+        //{
+        //    processinput(new action("xmove", time.time, xmove));
 
-        dash = CrossPlatformInputManager.GetButton("Dash");
-        if (CrossPlatformInputManager.GetButtonDown("Dash")){
-            ProcessInput(new Action("dash", Time.time, CrossPlatformInputManager.GetButtonDown("Dash")));
-        }
+
+        //}
+        //float ymove = CrossPlatformInputManager.GetAxis("Vertical");
+        //movement = new Vector2(xmove, ymove);
+        //if(ymove != 0)
+        //{
+        //    processinput(new action("ymove", time.time, ymove));
+
+        //}
+
+        //dash = crossplatforminputmanager.getbutton("dash");
+        //if (crossplatforminputmanager.getbuttondown("dash")){
+        //    processinput(new action("dash", time.time, crossplatforminputmanager.getbuttondown("dash")));
+        //}
     }
     // Update is called once per frame
     void FixedUpdate() {
-        cb.Move(xMove, yMove, Dash(dash));
+        cb.Move(movement, Dash(dash));
+
         //rb.MovePosition(((new Vector2 (xMove, yMove) * speedBuffer * Time.fixedDeltaTime) + new Vector2(transform.position.x, transform.position.y)));
 
 

@@ -12,14 +12,16 @@ public class CamFollow : MonoBehaviour
     public Vector2 minXAndY; // The minimum x and y coordinates the camera can have.
     Vector3 velocity = Vector3.zero;
     private Transform player; // Reference to the player's transform.
-    Vector2 playerPos;
+    Vector3 playerPos;
     Vector3 camPos;
+
     private Rigidbody2D playerRB;
     public float smoothTime = 1;
 
 
     private void Awake()
     {
+        print(SystemInfo.graphicsDeviceName);
         // Setting up the reference.
         player = GameObject.FindGameObjectWithTag("Player").transform;
         playerRB = player.GetComponent<Rigidbody2D>();
@@ -43,18 +45,19 @@ public class CamFollow : MonoBehaviour
 
     private void Update()
     {
+
+
+
+    }
+    private void FixedUpdate() {
         camPos = transform.position;
         playerPos = player.position;
 
 
     }
-    private void FixedUpdate() {
-
-
-
-    }
     private void LateUpdate()
     {
+
         TrackPlayer();
 
     }
@@ -72,14 +75,14 @@ public class CamFollow : MonoBehaviour
         if (CheckXMargin())
         {
             // ... the target x coordinate should be a Lerp between the camera's current x position and the player's current x position.
-            targetX = Mathf.Lerp(camPos.x, playerPos.x, xSmooth * Time.deltaTime);
+            targetX = Mathf.Lerp(camPos.x, playerPos.x, xSmooth * Time.fixedDeltaTime);
         }
 
         // If the player has moved beyond the y margin...
         if (CheckYMargin())
         {
             // ... the target y coordinate should be a Lerp between the camera's current y position and the player's current y position.
-            targetY = Mathf.Lerp(camPos.y, playerPos.y, ySmooth * Time.deltaTime);
+            targetY = Mathf.Lerp(camPos.y, playerPos.y, ySmooth * Time.fixedDeltaTime);
         }
 
         // The target x and y coordinates should not be larger than the maximum or smaller than the minimum.
@@ -88,5 +91,13 @@ public class CamFollow : MonoBehaviour
        
         // Set the camera's position to the target position with the same z component.
         transform.position = new Vector3(targetX, targetY, transform.position.z);
+    }
+    private void TrackPlayerOld() {
+
+        Vector3 point = Camera.main.WorldToViewportPoint(playerPos);
+        Vector3 delta = playerPos - Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, point.z)); //(new Vector3(0.5, 0.5, point.z));
+        Vector3 destination = transform.position + delta;
+        transform.position = Vector3.SmoothDamp(transform.position, destination, ref velocity, smoothTime);
+
     }
 }

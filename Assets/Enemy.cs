@@ -43,7 +43,7 @@ public class Enemy : CharacterBehavior {
     }
     // Update is called once per frame
     void FixedUpdate () {
-        Move(moveX, moveY);
+        //Move(moveX, moveY);
 
 
 

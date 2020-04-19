@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//[System.Serializable]
 //public class Maneuver {
 //    public enum ActionType { MeleeAttack, DashAttack, BurstAttack, Charge, Dash, Sub, Shield, Ascend, Descend, Interrupt};
 //    public ActionType actionType; //type of action being performed/queued
@@ -26,6 +25,7 @@ using UnityEngine;
 //        decayTime = t;
 //    }
 //}
+[System.Serializable]
 public class Action : Object
 {
     public string Name { get; set; }
