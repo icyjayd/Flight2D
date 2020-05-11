@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour {
     public static GameManager gm;
     public PlayerController player;
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         player = GameObject.FindObjectOfType<PlayerController>();
         QualitySettings.vSyncCount = 0;
         gm = this;

@@ -47,7 +47,7 @@
                 },
                 {
                     "name": "New action",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "4332e2bb-cddb-4701-b7f1-9f51f0389f5e",
                     "expectedControlType": "Button",
                     "processors": "",
@@ -290,6 +290,17 @@
                     "name": "",
                     "id": "a2ba7fd3-f209-4134-845f-c25dd7279272",
                     "path": "<Keyboard>/rightShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Charge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "49d9fa21-a7ac-482c-9cd9-1cd4242cb3d7",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

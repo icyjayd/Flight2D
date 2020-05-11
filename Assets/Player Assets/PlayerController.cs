@@ -6,7 +6,7 @@ using UnityStandardAssets.CrossPlatformInput;
 
 public class PlayerController : MonoBehaviour {
     private Vector2 movement;
-    private bool dash;
+    private bool dash, charging =false;
     Action lastMove;
     Rigidbody2D rb;
     private CharacterBehavior cb;
@@ -14,12 +14,14 @@ public class PlayerController : MonoBehaviour {
     //
     public Queue<Action> inputBuffer;
     public InputMaster controls;
-
     private void Awake()
     {
         controls = new InputMaster();
         controls.Player.Attack.performed += ctx => Attack();
         controls.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
+        controls.Player.Charge.started += ctx => Charge();
+        controls.Player.Charge.canceled += ctx => EndCharge();
+ 
     }
 
     void OnEnable()
@@ -48,6 +50,31 @@ public class PlayerController : MonoBehaviour {
         else{
             return 1f; 
         }
+    }
+
+    void Charge()
+    {
+        ///moving disables charging and enables dash, charging disables movement and dash
+        bool moving = (movement.magnitude != 0);
+        if (moving)
+        {
+            print("dashing");
+            dash = true;
+            charging = false;
+        }
+        else
+        {
+            print("charging");
+            dash = false;
+            charging = true;
+
+        }
+    }
+
+    void EndCharge()
+    {
+        dash = false;
+        charging = false;
     }
     void ProcessInput(Action action)//takes all input and adds it to the queue, catching held movement and new movement;
     {
@@ -82,8 +109,16 @@ public class PlayerController : MonoBehaviour {
 
     public void Move(Vector2 dir)
     {
-        Debug.Log(dir);
-        movement = dir;
+        ///moving disables charging and enables dash, charging disables movement and dash
+   //     Debug.Log(dir);
+        if (!charging)
+        {
+            movement = dir;
+        }
+        else
+        {
+            movement = Vector2.zero;
+        }
     }
 
     private void Update()

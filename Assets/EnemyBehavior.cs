@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : CharacterBehavior {
+public class EnemyBehavior : CharacterBehavior {
 
     public Transform playerTransform;
     Vector3 dir;
@@ -16,31 +16,31 @@ public class Enemy : CharacterBehavior {
     // Use this for initialization
     new void Start () {
         base.Start();
+
         playerTransform = gm.GetPlayerTransform();
 	}
 
-
-    private void Update()
-    {
-        dir = playerTransform.position - transform.position;
-        if (HelperFunctions.CheckBoundary(dir.x, minDist) == false)
-        {
-            moveX = Mathf.Clamp(moveX + HelperFunctions.Sign(dir.x) * Time.deltaTime * acceleration,xSpeed * -1, xSpeed);
-        }
-        else
-        {
-            moveX = 0;
-        }
-        if (HelperFunctions.CheckBoundary(dir.y, minDist) == false)
-        {
-            moveY = Mathf.Clamp(moveY + HelperFunctions.Sign(dir.y) * Time.deltaTime * acceleration, ySpeed * -1, ySpeed);
-        }
-        else
-        {
-            moveY = 0;
-        }
-        // print(moveX);
-    }
+    //private void Update()
+    //{
+    //    dir = playerTransform.position - transform.position;
+    //    if (HelperFunctions.CheckBoundary(dir.x, minDist) == false)
+    //    {
+    //        moveX = Mathf.Clamp(moveX + HelperFunctions.Sign(dir.x) * Time.deltaTime * acceleration,xSpeed * -1, xSpeed);
+    //    }
+    //    else
+    //    {
+    //        moveX = 0;
+    //    }
+    //    if (HelperFunctions.CheckBoundary(dir.y, minDist) == false)
+    //    {
+    //        moveY = Mathf.Clamp(moveY + HelperFunctions.Sign(dir.y) * Time.deltaTime * acceleration, ySpeed * -1, ySpeed);
+    //    }
+    //    else
+    //    {
+    //        moveY = 0;
+    //    }
+    //    // print(moveX);
+    //}
     // Update is called once per frame
     void FixedUpdate () {
         //Move(moveX, moveY);
@@ -54,16 +54,18 @@ public class Enemy : CharacterBehavior {
         if (watching)
         {
 
-            if (dir.x > 0 && !facingRight)
+            if (moveX > 0 && facingRight)
             {
+                //print("flipping right");
                 // ... flip the player.
-                Flip();
+                base.Flip();
             }
             // Otherwise if the input is moving the player left and the player is facing right...
-            else if (dir.x < 0 && facingRight)
+            else if (moveX < 0 && !facingRight)
             {
+                //print("flipping left");
                 // ... flip the player.
-                Flip();
+                base.Flip();
             }
         }
         

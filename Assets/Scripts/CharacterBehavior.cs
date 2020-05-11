@@ -12,28 +12,59 @@ public class CharacterBehavior : MonoBehaviour {
     public float ySpeed = 10;// speed moving up and down
     public float dashModifier = 2; //speed increase by dashing
     public float smoothing = 0.5f;
-    public bool facingRight, attacking = false;
+    public bool facingRight, attacking = false, charging = false;
     bool dashing;
     public Rigidbody2D rb;
     public GameManager gm;
+    int comboCount = 0;
     float distance = 0;
+    Animator anim;
     RaycastHit2D[] hit = new RaycastHit2D[1];
     Weapon weapon;
- 
-    SpriteRenderer sp;
+
+
+    public SpriteRenderer sp;
     Vector2 velocity = Vector2.zero;
     // Use this for initialization
 
     //possibly temporary variables for setup
     float weaponBufferX;
-
-    public void Start () {
-        rb = GetComponent<Rigidbody2D>();
+    public Collider2D[] attackHitBoxes;
+    [SerializeField]
+    Color chargeColor;
+    private void Awake()
+    {
         gm = FindObjectOfType<GameManager>();
+        rb = GetComponent<Rigidbody2D>();
+
+        //attackHitBoxes = new Collider[4];
+        attackHitBoxes = GetComponentsInChildren<Collider2D>();
+        //foreach(Collider2D item in attackHitBoxes)
+        //{ 
+
+        //    if(item.name.Contains("Melee Attack Hitbox"))
+        //    {
+        //        print(item.name);
+        //        item.gameObject.SetActive(false);
+        //    }
+        //}
+    }
+    public void Start() {
+        
         sp = GetComponent<SpriteRenderer>();
         weapon = GetComponentInChildren<Weapon>();
+        anim = GetComponent<Animator>();
         weaponBufferX = weapon.transform.position.x - transform.position.x;
     }
+
+    private void Reset()
+    {
+
+    }
+    //private void Update()
+    //{
+    //    print(gm);
+    //}
     public virtual void Move(Vector2 input, float dash = 1)
     {
         Vector2 pos = new Vector2(transform.position.x, transform.position.y);
@@ -57,6 +88,7 @@ public class CharacterBehavior : MonoBehaviour {
         // rb.AddForce(new Vector2(moveX, moveY));
 
         // If the input is moving the player right and the player is facing left...
+       
         FlipCheck(input.x);
     }
 
@@ -76,15 +108,47 @@ public class CharacterBehavior : MonoBehaviour {
 
 
     }
+    public void End()
+
+    ///this is literally the simplest way for me to think of extending animation clip length without a new animation
+    {
+        return;
+    }
+    public void StopAttacking()
+    {
+        attacking = false;
+    }
     public void Attack() {
-        weapon.anim.SetTrigger("Attack");
+        ///Continuing the combo and hitbox activation/deactivation are currently handled by the player animator
+        ///The actual sprite work is handled by the weapon (for now)
+
+        if (!attacking)
+        {
+            attacking = true;
+            weapon.anim.SetTrigger("Attack");
+            anim.SetTrigger("Attack");
+
+
+        }
+    }
+
+    public void Shoot()
+    {
+        ///Shoot() will simply shoot
+        return;
+    }
+
+    public virtual IEnumerator Charge(Vector2 movementInput, bool button) 
+    {
+        return null;
+
     }
     public virtual IEnumerator Swing(Weapon weapon, Vector3 start, Vector3 end, float totalTime = .5f) {
         //update the position of weapon to the endpoint of the swing and let it rest there for the total time
         if (!attacking)
         {
 
-            attacking = true;
+
             float elapsedTime = 0;
             while (elapsedTime < totalTime)
             {
@@ -105,20 +169,23 @@ public class CharacterBehavior : MonoBehaviour {
     }
     public virtual void Flip()
     {
-        // Switch the way the player is labelled as facing.
-        facingRight = !facingRight;
-        sp.flipX = !sp.flipX;
-        weapon.sp.flipX = !weapon.sp.flipX;
-        Debug.Log("before:" + weapon.transform.position.x.ToString());
-        weaponBufferX = weaponBufferX * -1;
-        // weapon.transform.localPosition = new Vector3(1, 0, 0);
-        //weapon.transform.position = new Vector3(transform.position.x + weaponBufferX, weapon.transform.position.y, weapon.transform.position.z);
-        weapon.transform.localPosition = new Vector3(weapon.transform.localPosition.x * -1, weapon.transform.localPosition.y, weapon.transform.localPosition.z);
-        Debug.Log("after:" + weapon.transform.position.x.ToString());
+        if (sp)
+        {
+            // Switch the way the player is labelled as facing.
+            facingRight = !facingRight;
+            sp.flipX = !sp.flipX;
+            weapon.sp.flipX = !weapon.sp.flipX;
+            //Debug.Log("before:" + weapon.transform.position.x.ToString());
+            weaponBufferX = weaponBufferX * -1;
+            // weapon.transform.localPosition = new Vector3(1, 0, 0);
+            //weapon.transform.position = new Vector3(transform.position.x + weaponBufferX, weapon.transform.position.y, weapon.transform.position.z);
+            weapon.transform.localPosition = new Vector3(weapon.transform.localPosition.x * -1, weapon.transform.localPosition.y, weapon.transform.localPosition.z);
+            //Debug.Log("after:" + weapon.transform.position.x.ToString());
 
-        // Multiply the player's x local scale by -1.
-        // Vector3 theScale = transform.localScale;
-        //theScale.x *= -1;
-        //transform.localScale = theScale;
+            // Multiply the player's x local scale by -1.
+            // Vector3 theScale = transform.localScale;
+            //theScale.x *= -1;
+            //transform.localScale = theScale;
+        }
     }
 }

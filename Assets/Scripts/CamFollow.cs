@@ -21,7 +21,7 @@ public class CamFollow : MonoBehaviour
 
     private void Awake()
     {
-        print(SystemInfo.graphicsDeviceName);
+        //print(SystemInfo.graphicsDeviceName);
         // Setting up the reference.
         player = GameObject.FindGameObjectWithTag("Player").transform;
         playerRB = player.GetComponent<Rigidbody2D>();
