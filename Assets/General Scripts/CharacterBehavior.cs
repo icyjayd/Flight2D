@@ -65,7 +65,7 @@ public class CharacterBehavior : MonoBehaviour {
     //{
     //    print(gm);
     //}
-    public virtual void Move(Vector2 input, float dash = 1)
+    public virtual void Move(Vector2 input, float dash = 1, bool backwards = false)
     {
         Vector2 pos = new Vector2(transform.position.x, transform.position.y);
         Vector2 dir = input * dash * speedBuffer * Time.fixedDeltaTime;
@@ -87,13 +87,14 @@ public class CharacterBehavior : MonoBehaviour {
         //rb.velocity = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
         // rb.AddForce(new Vector2(moveX, moveY));
 
-        // If the input is moving the player right and the player is facing left...
        
         FlipCheck(input.x);
     }
 
     public virtual void FlipCheck(float moveX)
     {
+        // If the input is moving the player right and the player is facing left...
+
         if (moveX > 0 && !facingRight)
         {
             // ... flip the player.
@@ -105,6 +106,7 @@ public class CharacterBehavior : MonoBehaviour {
             // ... flip the player.
             Flip();
         }
+
 
 
     }

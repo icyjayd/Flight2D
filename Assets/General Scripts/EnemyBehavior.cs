@@ -51,6 +51,8 @@ public class EnemyBehavior : CharacterBehavior {
 
     public override void FlipCheck(float moveX)
     {
+
+
         if (watching)
         {
 
@@ -67,6 +69,7 @@ public class EnemyBehavior : CharacterBehavior {
                 // ... flip the player.
                 base.Flip();
             }
+
         }
         
     }

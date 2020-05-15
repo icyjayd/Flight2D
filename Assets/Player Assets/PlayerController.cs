@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour {
     Action lastMove;
     Rigidbody2D rb;
     private CharacterBehavior cb;
-    public float inputThreshold = .2f;
+    public float inputThreshold = .2f, dashMultiplier = 2f;
     //
     public Queue<Action> inputBuffer;
     public InputMaster controls;
@@ -23,6 +23,48 @@ public class PlayerController : MonoBehaviour {
         controls.Player.Charge.canceled += ctx => EndCharge();
  
     }
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        cb = GetComponent<CharacterBehavior>();
+        inputBuffer = new Queue<Action>();
+
+    }
+    private void Update()
+    {
+
+
+        //updatebuffer();
+
+        //float xmove = CrossPlatformInputManager.GetAxis("Horizontal");
+        //if (xmove != 0)
+        //{
+        //    processinput(new action("xmove", time.time, xmove));
+
+
+        //}
+        //float ymove = CrossPlatformInputManager.GetAxis("Vertical");
+        //movement = new Vector2(xmove, ymove);
+        //if(ymove != 0)
+        //{
+        //    processinput(new action("ymove", time.time, ymove));
+
+        //}
+
+        //dash = crossplatforminputmanager.getbutton("dash");
+        //if (crossplatforminputmanager.getbuttondown("dash")){
+        //    processinput(new action("dash", time.time, crossplatforminputmanager.getbuttondown("dash")));
+        //}
+    }
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        cb.Move(movement, Dash(dash));
+
+        //rb.MovePosition(((new Vector2 (xMove, yMove) * speedBuffer * Time.fixedDeltaTime) + new Vector2(transform.position.x, transform.position.y)));
+
+
+    }
 
     void OnEnable()
     {
@@ -32,18 +74,11 @@ public class PlayerController : MonoBehaviour {
     {
         controls.Disable();
     }
-    void Start ()
-    {
-        rb = GetComponent<Rigidbody2D>();
-        cb = GetComponent<CharacterBehavior>();
-        inputBuffer = new Queue<Action>();
- 
-    }
     float Dash(bool pressed)
     {
         if (pressed)
         {
-            return 2f;
+            return dashMultiplier;
 
 
         }
@@ -121,40 +156,6 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    private void Update()
-    {
-
-
-        //updatebuffer();
-
-        //float xmove = CrossPlatformInputManager.GetAxis("Horizontal");
-        //if (xmove != 0)
-        //{
-        //    processinput(new action("xmove", time.time, xmove));
-
-
-        //}
-        //float ymove = CrossPlatformInputManager.GetAxis("Vertical");
-        //movement = new Vector2(xmove, ymove);
-        //if(ymove != 0)
-        //{
-        //    processinput(new action("ymove", time.time, ymove));
-
-        //}
-
-        //dash = crossplatforminputmanager.getbutton("dash");
-        //if (crossplatforminputmanager.getbuttondown("dash")){
-        //    processinput(new action("dash", time.time, crossplatforminputmanager.getbuttondown("dash")));
-        //}
-    }
-    // Update is called once per frame
-    void FixedUpdate() {
-        cb.Move(movement, Dash(dash));
-
-        //rb.MovePosition(((new Vector2 (xMove, yMove) * speedBuffer * Time.fixedDeltaTime) + new Vector2(transform.position.x, transform.position.y)));
-
-
-    }
 
 
 
