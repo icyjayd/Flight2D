@@ -4,6 +4,7 @@ using UnityEngine;
 /// <summary>
 /// This class is meant to have actions which are usable by all characters, such as movement, attack, and basic rigidbody initialization.
 /// </summary>
+[RequireComponent(typeof(Health))]
 public class CharacterBehavior : MonoBehaviour {
     [SerializeField]
     private float speedBuffer = 500;
@@ -16,18 +17,20 @@ public class CharacterBehavior : MonoBehaviour {
     bool dashing;
     public Rigidbody2D rb;
     public GameManager gm;
+    public TagManager tm;
     int comboCount = 0;
     float distance = 0;
     Animator anim;
     RaycastHit2D[] hit = new RaycastHit2D[1];
     Weapon weapon;
-
+    public Health health;
 
     public SpriteRenderer sp;
     Vector2 velocity = Vector2.zero;
     // Use this for initialization
 
     //possibly temporary variables for setup
+    public SpriteRenderer[] hitboxSprites;
     float weaponBufferX;
     public Collider2D[] attackHitBoxes;
     [SerializeField]
@@ -36,13 +39,15 @@ public class CharacterBehavior : MonoBehaviour {
     {
         gm = FindObjectOfType<GameManager>();
         rb = GetComponent<Rigidbody2D>();
+        tm = FindObjectOfType<TagManager>();
 
+        weapon = GetComponentInChildren<Weapon>();
         //attackHitBoxes = new Collider[4];
         attackHitBoxes = GetComponentsInChildren<Collider2D>();
-        //foreach(Collider2D item in attackHitBoxes)
-        //{ 
+        //foreach (Collider2D item in attackHitBoxes)
+        //{
 
-        //    if(item.name.Contains("Melee Attack Hitbox"))
+        //    if (item.name.ToLower().Contains("melee attack hitbox"))
         //    {
         //        print(item.name);
         //        item.gameObject.SetActive(false);
@@ -53,7 +58,15 @@ public class CharacterBehavior : MonoBehaviour {
         
         sp = GetComponent<SpriteRenderer>();
         weapon = GetComponentInChildren<Weapon>();
+        //hitboxSprites = weapon.GetComponentsInChildren<SpriteRenderer>();
+        hitboxSprites = weapon.GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
+        foreach (SpriteRenderer spr in hitboxSprites)
+        {
+            print(spr.name);
+        }
+
         anim = GetComponent<Animator>();
+        health = GetComponent<Health>();
         weaponBufferX = weapon.transform.position.x - transform.position.x;
     }
 
@@ -169,6 +182,18 @@ public class CharacterBehavior : MonoBehaviour {
         }
 
     }
+
+    public virtual void OnTriggerEnter2D(Collider2D collision)
+    {
+
+        if(collision.gameObject.tag == tm.WeaponTag && collision.gameObject.transform.parent.tag == tm.EnemyTag)
+        {
+            Weapon attackingWeapon = collision.GetComponent<Weapon>();
+            
+            
+        }
+    }
+
     public virtual void Flip()
     {
         if (sp)
@@ -176,7 +201,12 @@ public class CharacterBehavior : MonoBehaviour {
             // Switch the way the player is labelled as facing.
             facingRight = !facingRight;
             sp.flipX = !sp.flipX;
+            
             weapon.sp.flipX = !weapon.sp.flipX;
+            foreach (SpriteRenderer hitboxSprite in hitboxSprites)
+            {
+                hitboxSprite.flipX = !hitboxSprite.flipX;
+            }
             //Debug.Log("before:" + weapon.transform.position.x.ToString());
             weaponBufferX = weaponBufferX * -1;
             // weapon.transform.localPosition = new Vector3(1, 0, 0);

@@ -11,19 +11,22 @@ public class EnemyController : MonoBehaviour
     private float moveX = 0, moveY = 0;
     private bool watching = true;
     [SerializeField]
-    private float minXDist = 1;
+    private float meleeRangeThresholdX = 1;
     [SerializeField]
     private float acceleration = 1.1f;
     [SerializeField]
-    private float maxXDist = 5, maxYdist = 0.5f;
+    private float midRangeThresholdX = 5, maxYDist = 0.5f;
+    private float meleeDist;//TODO: implement this
     CharacterBehavior cb;
+    [SerializeField]
+    RangeState rangeState;
 
     /// possibly temporary variables
     bool aggression = false; //might not use
 
     LineSegment path;
     float approachTime = 0;
-    private float playerXDist, playerYDist;
+    public float playerDistX, playerYDist;
     public float attackOdds = 0.7f;
     public float attackBias = 0f;//used to diminish the odds of too many successive attacks
     // Use this for initialization
@@ -40,9 +43,9 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        playerXDist = Mathf.Abs(transform.position.x - playerTransform.position.x);
+        playerDistX = Mathf.Abs(transform.position.x - playerTransform.position.x);
         playerYDist = Mathf.Abs(transform.position.y - playerTransform.position.y);
-
+        rangeState = GetState();
         //approachTime += Time.deltaTime;
         //if (approachTime % 10 < 5)
         //{
@@ -50,13 +53,26 @@ public class EnemyController : MonoBehaviour
         //}
 
     }
-
     private void FixedUpdate()
     {
         
         cb.Move(dir);
     }
-
+    RangeState GetState()
+    {
+        if (playerDistX > midRangeThresholdX || playerYDist > maxYDist)
+        {
+            return RangeState.Long;
+        }
+        else if (playerDistX > meleeRangeThresholdX)
+        {
+            return RangeState.Mid;
+        }
+        else
+        {
+            return RangeState.Short;
+        }
+    }
     bool Aggression(float odds)
     {
         return (Random.Range(0, 1) <= odds);
@@ -64,13 +80,18 @@ public class EnemyController : MonoBehaviour
     private void ApproachPlayer()
     {
         //pass a "normalized input" calculated based on the player's position vs. this object's position
-        if (playerYDist > maxYdist)
+        if (playerYDist > maxYDist)
         {
             dir = new Vector2(0, playerTransform.position.y - transform.position.y);
         }
+        else if (playerDistX > meleeRangeThresholdX)
+        {
+
+            dir = playerTransform.position - transform.position;
+        }
         else
         {
-            dir = playerTransform.position - transform.position;
+            dir = Vector3.zero;
         }
         dir = dir.normalized;
         
@@ -88,20 +109,21 @@ public class EnemyController : MonoBehaviour
 
 
 //        cb.Move(dir);
-
-
     }
+
+
     IEnumerator Approach(bool attacking = false)
     {
-        print("approaching");
-        float dist = (playerXDist >maxXDist) ? (maxXDist - (maxXDist- minXDist)/2) : minXDist;//if attacking, close the gap; otherwise, approach to regular range
+        float dist = (playerDistX >midRangeThresholdX) ? (midRangeThresholdX - (midRangeThresholdX- meleeRangeThresholdX)/2) : meleeRangeThresholdX;//if attacking, close the gap; otherwise, approach to regular range
        
-        while (playerXDist > dist || playerYDist > maxYdist)
+        while (playerDistX > dist || playerYDist > maxYDist)
         {
+            print("approaching");
+
             ApproachPlayer();
             yield return null;
         }
-        if (dist == minXDist)
+        if (dist == meleeRangeThresholdX)
         {
             StartCoroutine(Attack());
             yield break;
@@ -119,7 +141,6 @@ public class EnemyController : MonoBehaviour
     {
         if (Aggression(attackOdds -attackBias))
         {
-            print("attacking");
             attackBias +=  0.1f;
             StartCoroutine(Attack());
         }
@@ -133,15 +154,18 @@ public class EnemyController : MonoBehaviour
 
     IEnumerator Attack()
     {
+        dir = Vector3.zero;
+
         float elapsedTime = 0;
         while(elapsedTime <= 1f)
         {
+            print("attacking");
+
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        if (playerXDist <= minXDist || playerXDist > maxXDist || playerYDist > maxYdist)//if the player is in range at the end, begin attacking
+        if (playerDistX <= meleeRangeThresholdX || playerDistX > midRangeThresholdX || playerYDist > maxYDist)//if the player is in range at the end, begin attacking
         {
-            dir = Vector3.zero;
             //movement = Vector3.zero;
             StartCoroutine(Approach());
             yield break;
@@ -152,7 +176,6 @@ public class EnemyController : MonoBehaviour
     }
     IEnumerator FollowPath(LineSegment lineSegment)
     {
-        print("following movement path");
         List < Vector2 > points = lineSegment.points;
         float totalDuration = 0;
         
@@ -166,6 +189,8 @@ public class EnemyController : MonoBehaviour
         float pastDurationSum = 0;
         while (elapsedTime <= totalDuration)
         {
+            print("following movement path");
+
             elapsedTime += Time.deltaTime;
             //if the difference between the elapsed time and the total duration of each segment thus far is greater than the current duration
             //switch to the next duration
@@ -186,13 +211,15 @@ public class EnemyController : MonoBehaviour
             //{
             //    points[j] = new Vector2(points[j].x * -1, points[j].y);
             //}
+            //ApproachPlayer();
             dir = points[j];
+            //dir = movement - startPos;
 
              
 
             yield return null;
         }
-        if (playerXDist <= minXDist || playerXDist > maxXDist || playerYDist > maxYdist)//if the player is in range at the end, begin attacking
+        if (playerDistX <= meleeRangeThresholdX || playerDistX > midRangeThresholdX || playerYDist > maxYDist)//if the player is in range at the end, begin attacking
         {
             dir = Vector3.zero;
             //movement = Vector3.zero;

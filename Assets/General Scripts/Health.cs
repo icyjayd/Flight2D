@@ -8,7 +8,19 @@ public class Health : MonoBehaviour {
 	void Start () {
 		
 	}
-	
+
+    public void TakeDamage(float damage)
+    {
+        health = Mathf.Clamp(health - damage, 0, maxHealth);
+        
+    }
+	void Die()
+    {
+        if(health <= 0)
+        {
+
+        }
+    }
 	// Update is called once per frame
 	void Update () {
 		

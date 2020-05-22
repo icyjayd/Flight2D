@@ -13,12 +13,26 @@ public class EnemyBehavior : CharacterBehavior {
     private float minDist = 1;
     [SerializeField]
     private float acceleration = 1.1f;
+    bool idle = true; //use this for state behavior
     // Use this for initialization
     new void Start () {
         base.Start();
 
         playerTransform = gm.GetPlayerTransform();
 	}
+    public override void OnTriggerEnter2D(Collider2D collision)
+    {
+        print("collision detected");    
+
+        if (collision.gameObject.tag == tm.WeaponTag && collision.gameObject.transform.root.tag == tm.PlayerTag)
+        {
+            Weapon attackingWeapon = collision.GetComponentInParent<Weapon>();
+            health.TakeDamage(attackingWeapon.damage);
+            Debug.Log(name + " hit by "+attackingWeapon.transform.parent.name);
+
+        }
+    }
+
 
     //private void Update()
     //{
