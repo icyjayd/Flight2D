@@ -16,9 +16,14 @@ public class Weapon : MonoBehaviour
         get { return active; }
         set { active = value; }
     }//boolean to determine whether the weapon is active all the time
+    [SerializeField]
+    Color clashColor = Color.yellow;
+    Color normalColor;
+    SpriteRenderer spriteRenderer;
     private void Start()
     {
-       
+        spriteRenderer= GetComponent<SpriteRenderer>();
+        normalColor = spriteRenderer.color;
         anim = GetComponent<Animator>();
         sp = GetComponent<SpriteRenderer>();
         baseDamage = damage;
@@ -29,12 +34,25 @@ public class Weapon : MonoBehaviour
 
     }
 
+    IEnumerator UseClashColor(float total = 0.25f)
+    {
+        float elapsed = 0;
+        spriteRenderer.color = clashColor;
+        while (elapsed < total)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        spriteRenderer.color = normalColor;
+    }
     public void Clash()
     {
+        StartCoroutine(UseClashColor());
         active = false;
         SendMessageUpwards("OnClash");
+        print(string.Format("{0} weapon clashing!", transform.root.name));
 
-       
+
     }
     private void Update()
     {
@@ -42,7 +60,7 @@ public class Weapon : MonoBehaviour
     }
     public void Launch(Rigidbody2D rigidbody)
     {
-        print(rigidbody.name);
+        //print(rigidbody.name);
         Vector2 dir = (rigidbody.transform.position - transform.position).normalized;
         dir.y = 0;
         rigidbody.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
@@ -50,14 +68,13 @@ public class Weapon : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        print(string.Format("{0} weapon colliding with {1}", transform.root.name, collision.name));
         if (active)
         {
-            if (collision.GetComponent<Weapon>())
+            if (collision.GetComponentInParent<Weapon>())
             {
                 //weapon clashes cause both weapons to Clash, deactivating them and activating the clash animation of the character with that weapon
                 //clashing ends when both opponents reach idle
-                collision.GetComponent<Weapon>().Clash();
+                collision.GetComponentInParent<Weapon>().Clash();
                 Clash();
             }
         }

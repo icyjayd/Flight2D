@@ -1432,7 +1432,8 @@ MonoBehaviour:
   sp: {fileID: 0}
   damage: 0
   knockback: 0
-  knockbackForce: 100
+  knockbackForce: 0.5
+  clashColor: {r: 1, g: 0.80126864, b: 0.7607843, a: 1}
 --- !u!212 &1249589107
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2118,7 +2119,8 @@ MonoBehaviour:
   sp: {fileID: 0}
   damage: 10
   knockback: 0
-  knockbackForce: 100
+  knockbackForce: 0.5
+  clashColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!95 &2023493903
 Animator:
   serializedVersion: 3
