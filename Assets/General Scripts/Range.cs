@@ -1,5 +1,5 @@
 ﻿
 public enum RangeState
 {
-    Long, Mid, Short
+    Long, Mid, Short,PointBlank
 }

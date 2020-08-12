@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
     //
     public Queue<Action> inputBuffer;
     public InputMaster controls;
+    
     private void Awake()
     {
         controls = new InputMaster();
@@ -60,7 +61,7 @@ public class PlayerController : MonoBehaviour {
     void FixedUpdate()
     {
         cb.Move(movement, Dash(dash));
-
+        
         //rb.MovePosition(((new Vector2 (xMove, yMove) * speedBuffer * Time.fixedDeltaTime) + new Vector2(transform.position.x, transform.position.y)));
 
 
@@ -138,6 +139,7 @@ public class PlayerController : MonoBehaviour {
     }
     public void Attack()
     {
+        
         cb.Attack();
 
     }

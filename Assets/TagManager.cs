@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class TagManager : MonoBehaviour
 {
-    public string PlayerTag, EnemyTag, WeaponTag;
+    public string PlayerTag, EnemyTag, WeaponTag, ItemTag;
 }

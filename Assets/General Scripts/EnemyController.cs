@@ -16,7 +16,7 @@ public class EnemyController : MonoBehaviour
     private float acceleration = 1.1f;
     [SerializeField]
     private float midRangeThresholdX = 5, maxYDist = 0.5f;
-    private float meleeDist;//TODO: implement this
+    private float pointBlankRange = 0.7f;//TODO: implement this
     CharacterBehavior cb;
     [SerializeField]
     RangeState rangeState;
@@ -29,16 +29,23 @@ public class EnemyController : MonoBehaviour
     public float playerDistX, playerYDist;
     public float attackOdds = 0.7f;
     public float attackBias = 0f;//used to diminish the odds of too many successive attacks
-    // Use this for initialization
+    //General notes:
+    //RANGES
+    //Long range behavior of the basic baddy: approach in "travel mode" then transition to mid range mode 
+    //Mid range: try to bait player into attacking with dodge patterns, leaving the player to whiff
+    //Melee range: defined as the range in which a dash attack has a high chance of success unless there is a dedicated dodge or shield
+    //Point blank range: defined as the range in which a melee attack will definitely hit its target unless shielded
     void Start()
     {
-        cb = GetComponent<CharacterBehavior>();
+        cb = GetComponent<EnemyBehavior>();
         playerTransform = cb.gm.GetPlayerTransform();
         path = GetComponentInChildren<LineSegment>();
         aggression = (Random.Range(0, 1) <= attackOdds);
         StartCoroutine(Approach());
+        
+        
     }
-
+    
 
     // Update is called once per frame
     void Update()
@@ -51,7 +58,6 @@ public class EnemyController : MonoBehaviour
         //{
         //    ApproachPlayer();
         //}
-
     }
     private void FixedUpdate()
     {
@@ -68,9 +74,13 @@ public class EnemyController : MonoBehaviour
         {
             return RangeState.Mid;
         }
-        else
+        else if (playerDistX > pointBlankRange)
         {
             return RangeState.Short;
+        }
+        else
+        {
+            return RangeState.PointBlank;
         }
     }
     bool Aggression(float odds)
@@ -155,22 +165,35 @@ public class EnemyController : MonoBehaviour
     IEnumerator Attack()
     {
         dir = Vector3.zero;
-
+        
         float elapsedTime = 0;
-        while(elapsedTime <= 1f)
-        {
-            print("attacking");
 
+        cb.weapon.Active = true;
+        yield return new WaitForSeconds(Time.deltaTime * 2);
+        int lim = 3;
+        int i = 0;
+       
+        while(i <lim)
+        {
+
+            if (!cb.anim.GetBool("Attack"))
+            {
+                i += 1;
+                cb.anim.SetTrigger("Attack");
+                yield return null;
+            }
+            if (playerDistX <= meleeRangeThresholdX || playerDistX > midRangeThresholdX || playerYDist > maxYDist)//if the player is in range at the end, begin attacking
+            {
+                //movement = Vector3.zero;
+                StartCoroutine(Approach());
+                yield break;
+
+            }
             elapsedTime += Time.deltaTime;
             yield return null;
-        }
-        if (playerDistX <= meleeRangeThresholdX || playerDistX > midRangeThresholdX || playerYDist > maxYDist)//if the player is in range at the end, begin attacking
-        {
-            //movement = Vector3.zero;
-            StartCoroutine(Approach());
-            yield break;
 
         }
+       
 
         AttackOrMove();
     }

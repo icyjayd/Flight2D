@@ -13,18 +13,19 @@ public class CharacterBehavior : MonoBehaviour {
     public float ySpeed = 10;// speed moving up and down
     public float dashModifier = 2; //speed increase by dashing
     public float smoothing = 0.5f;
-    public bool facingRight, attacking = false, charging = false;
+    public bool facingRight, attacking = false, charging = false, stunned = false;
     bool dashing;
     public Rigidbody2D rb;
     public GameManager gm;
     public TagManager tm;
     int comboCount = 0;
     float distance = 0;
-    Animator anim;
+    public Animator anim;
     RaycastHit2D[] hit = new RaycastHit2D[1];
-    Weapon weapon;
+    public Weapon weapon;
     public Health health;
-
+    [SerializeField]
+    private int mainComboLimit=4;
     public SpriteRenderer sp;
     Vector2 velocity = Vector2.zero;
     // Use this for initialization
@@ -60,19 +61,32 @@ public class CharacterBehavior : MonoBehaviour {
         weapon = GetComponentInChildren<Weapon>();
         //hitboxSprites = weapon.GetComponentsInChildren<SpriteRenderer>();
         hitboxSprites = weapon.GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
-        foreach (SpriteRenderer spr in hitboxSprites)
-        {
-            print(spr.name);
-        }
+        //foreach (SpriteRenderer spr in hitboxSprites)
+        //{
+        //    print(spr.name);
+        //}
 
         anim = GetComponent<Animator>();
         health = GetComponent<Health>();
         weaponBufferX = weapon.transform.position.x - transform.position.x;
     }
+    public void OnClash()///if you change this, make sure you change the Weapon.cs call!
 
-    private void Reset()
+    {
+        print("OnClash triggered");
+        anim.SetTrigger("Clash");
+        stunned = true;
+        //start clashing animation
+        //activate weapon when idle is reached
+    }
+
+    public void Reset()
     {
 
+        //reset things to base, useful after clashing
+        weapon.knockback = false;
+        stunned = false;
+        weapon.Active = false;
     }
     //private void Update()
     //{
@@ -80,28 +94,31 @@ public class CharacterBehavior : MonoBehaviour {
     //}
     public virtual void Move(Vector2 input, float dash = 1, bool backwards = false)
     {
-        Vector2 pos = new Vector2(transform.position.x, transform.position.y);
-        Vector2 dir = input * dash * speedBuffer * Time.fixedDeltaTime;
-        distance = dir.magnitude;
-        int results = rb.Cast(dir.normalized, hit, dir.magnitude * 4 - 0.01f);
-        if (results > 0)
+        if (!stunned)
         {
-            //print("detected");
-            distance = hit[0].fraction * dir.normalized.magnitude;
-        }
-        // rb.velocity = dir ;
-        if (distance < 0.01f)
-        {
-            distance = 0;
-            //rb.velocity = Vector2.zero;
-        }
-        rb.MovePosition(pos + dir * distance);
-        //Collider2D[] cols = 
-        //rb.velocity = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
-        // rb.AddForce(new Vector2(moveX, moveY));
+            Vector2 pos = new Vector2(transform.position.x, transform.position.y);
+            Vector2 dir = input * dash * speedBuffer * Time.fixedDeltaTime;
+            distance = dir.magnitude;
+            int results = rb.Cast(dir.normalized, hit, dir.magnitude * 4 - 0.01f);
+            if (results > 0)
+            {
+                //print("detected");
+                distance = hit[0].fraction * dir.normalized.magnitude;
+            }
+            // rb.velocity = dir ;
+            if (distance < 0.01f)
+            {
+                distance = 0;
+                //rb.velocity = Vector2.zero;
+            }
+            rb.MovePosition(pos + dir * distance);
+            //Collider2D[] cols = 
+            //rb.velocity = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
+            // rb.AddForce(new Vector2(moveX, moveY));
 
-       
-        FlipCheck(input.x);
+
+            FlipCheck(input.x);
+        }
     }
 
     public virtual void FlipCheck(float moveX)
@@ -123,27 +140,43 @@ public class CharacterBehavior : MonoBehaviour {
 
 
     }
+    
     public void End()
 
     ///this is literally the simplest way for me to think of extending animation clip length without a new animation
     {
+        weapon.knockback = false;
         return;
+    }
+
+    public void ToggleWeaponKnockback()
+    {
+        //print("weapon knocks back");
+        weapon.toggleKnockback();
     }
     public void StopAttacking()
     {
+        stunned = false;
         attacking = false;
+        if (weapon.knockback)
+        {
+            weapon.knockback = false;
+        }
+        weapon.Active = false;
     }
     public void Attack() {
         ///Continuing the combo and hitbox activation/deactivation are currently handled by the player animator
         ///The actual sprite work is handled by the weapon (for now)
-
-        if (!attacking)
+        if (!stunned)
         {
-            attacking = true;
-            weapon.anim.SetTrigger("Attack");
-            anim.SetTrigger("Attack");
+            if (!attacking)
+            {
+                attacking = true;
+                weapon.anim.SetTrigger("Attack");
+                anim.SetTrigger("Attack");
 
 
+            }
         }
     }
 
@@ -153,16 +186,22 @@ public class CharacterBehavior : MonoBehaviour {
         return;
     }
 
+    public virtual IEnumerator Knockback(float force)
+    {///while this is running, launch
+        yield return null;
+
+    }
     public virtual IEnumerator Charge(Vector2 movementInput, bool button) 
     {
         return null;
+
 
     }
     public virtual IEnumerator Swing(Weapon weapon, Vector3 start, Vector3 end, float totalTime = .5f) {
         //update the position of weapon to the endpoint of the swing and let it rest there for the total time
         if (!attacking)
         {
-
+            weapon.Active = true;
 
             float elapsedTime = 0;
             while (elapsedTime < totalTime)

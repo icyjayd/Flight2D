@@ -14,24 +14,41 @@ public class EnemyBehavior : CharacterBehavior {
     [SerializeField]
     private float acceleration = 1.1f;
     bool idle = true; //use this for state behavior
+    
+   // public Animator anim;
     // Use this for initialization
     new void Start () {
         base.Start();
-
         playerTransform = gm.GetPlayerTransform();
 	}
-    public override void OnTriggerEnter2D(Collider2D collision)
-    {
-        print("collision detected");    
 
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
         if (collision.gameObject.tag == tm.WeaponTag && collision.gameObject.transform.root.tag == tm.PlayerTag)
         {
             Weapon attackingWeapon = collision.GetComponentInParent<Weapon>();
             health.TakeDamage(attackingWeapon.damage);
-            Debug.Log(name + " hit by "+attackingWeapon.transform.parent.name);
-
+            Debug.Log(name + " hit by " + attackingWeapon.transform.parent.name);
+            if (attackingWeapon.knockback)
+            {
+                StopAllCoroutines();
+                print(name + "knocked back by" + attackingWeapon.transform.parent.name);
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                attackingWeapon.Launch(rb);
+                //TODO: make launching work
+            }
         }
+
+
     }
+    //public override void (Collider2D collision)
+    //{
+        
+        
+    //}
+
+
 
 
     //private void Update()
