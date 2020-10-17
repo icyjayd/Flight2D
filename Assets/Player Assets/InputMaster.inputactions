@@ -311,7 +311,18 @@
                 {
                     "name": "",
                     "id": "53ac3536-28d4-494b-9020-aea47999d15d",
-                    "path": "",
+                    "path": "<Keyboard>/j",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Shield",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dd0bc371-6734-43e3-a5da-d6a1d1947f04",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

@@ -28,23 +28,29 @@ public class CharacterBehavior : MonoBehaviour {
     private int mainComboLimit=4;
     public SpriteRenderer sp;
     Vector2 velocity = Vector2.zero;
-    // Use this for initialization
+    [SerializeField]
+    SoundInfo soundInfo;
+    AudioClip hitSound, comboSlashSound;
+
+    AudioSource audioSource;
+
 
     //possibly temporary variables for setup
     public SpriteRenderer[] hitboxSprites;
     float weaponBufferX;
     public Collider2D[] attackHitBoxes;
     [SerializeField]
+    bool shielding = false;
+    public Shield shield;   
     Color chargeColor;
     private void Awake()
     {
         gm = FindObjectOfType<GameManager>();
         rb = GetComponent<Rigidbody2D>();
         tm = FindObjectOfType<TagManager>();
-
+        shield = GetComponentInChildren<Shield>(includeInactive: true);
         weapon = GetComponentInChildren<Weapon>();
         //attackHitBoxes = new Collider[4];
-        attackHitBoxes = GetComponentsInChildren<Collider2D>();
         //foreach (Collider2D item in attackHitBoxes)
         //{
 
@@ -59,6 +65,10 @@ public class CharacterBehavior : MonoBehaviour {
         
         sp = GetComponent<SpriteRenderer>();
         weapon = GetComponentInChildren<Weapon>();
+        attackHitBoxes = weapon.GetComponentsInChildren<Collider2D>(includeInactive:true);
+        audioSource = GetComponent<AudioSource>(); 
+       
+
         //hitboxSprites = weapon.GetComponentsInChildren<SpriteRenderer>();
         hitboxSprites = weapon.GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
         //foreach (SpriteRenderer spr in hitboxSprites)
@@ -73,6 +83,10 @@ public class CharacterBehavior : MonoBehaviour {
     public void OnClash()///if you change this, make sure you change the Weapon.cs call!
 
     {
+        foreach(Collider2D col in attackHitBoxes)
+        {
+            col.gameObject.SetActive(false);
+        }
         print("OnClash triggered");
         anim.SetTrigger("Clash");
         stunned = true;
@@ -86,7 +100,6 @@ public class CharacterBehavior : MonoBehaviour {
         //reset things to base, useful after clashing
         weapon.knockback = false;
         stunned = false;
-        weapon.Active = false;
     }
     //private void Update()
     //{
@@ -94,7 +107,7 @@ public class CharacterBehavior : MonoBehaviour {
     //}
     public virtual void Move(Vector2 input, float dash = 1, bool backwards = false)
     {
-        if (!stunned)
+        if (!stunned && rb.bodyType == RigidbodyType2D.Kinematic)
         {
             Vector2 pos = new Vector2(transform.position.x, transform.position.y);
             Vector2 dir = input * dash * speedBuffer * Time.fixedDeltaTime;
@@ -162,7 +175,6 @@ public class CharacterBehavior : MonoBehaviour {
         {
             weapon.knockback = false;
         }
-        weapon.Active = false;
     }
     public void Attack() {
         ///Continuing the combo and hitbox activation/deactivation are currently handled by the player animator
@@ -174,18 +186,44 @@ public class CharacterBehavior : MonoBehaviour {
                 attacking = true;
                 weapon.anim.SetTrigger("Attack");
                 anim.SetTrigger("Attack");
+                SetClip(soundInfo.comboSound, soundInfo.comboStart, volume:soundInfo.comboVolume);
 
 
             }
         }
     }
 
+    public void PlayClip()
+    {
+        if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+        audioSource.Play();
+
+    }
+    void SetClip(AudioClip clip, float time = 0, float volume = 1)
+    {
+        audioSource.clip = clip;
+        audioSource.time = time;
+        audioSource.volume = volume;
+    }
     public void Shoot()
     {
         ///Shoot() will simply shoot
         return;
     }
+    public void RaiseShield()
+    {
+        shielding = true;
+        shield.gameObject.SetActive(true);
+    }
 
+    public void LowerShield()
+    {
+        shielding = false;
+        shield.gameObject.SetActive(false);
+    }
     public virtual IEnumerator Knockback(float force)
     {///while this is running, launch
         yield return null;
@@ -201,7 +239,6 @@ public class CharacterBehavior : MonoBehaviour {
         //update the position of weapon to the endpoint of the swing and let it rest there for the total time
         if (!attacking)
         {
-            weapon.Active = true;
 
             float elapsedTime = 0;
             while (elapsedTime < totalTime)
@@ -221,17 +258,78 @@ public class CharacterBehavior : MonoBehaviour {
         }
 
     }
-
-    public virtual void OnTriggerEnter2D(Collider2D collision)
+    public string GetOppositeTag()
     {
-
-        if(collision.gameObject.tag == tm.WeaponTag && collision.gameObject.transform.parent.tag == tm.EnemyTag)
+        if (tag == tm.PlayerTag)
         {
-            Weapon attackingWeapon = collision.GetComponent<Weapon>();
-            
-            
+            return tm.EnemyTag;
+        }
+        else if (tag == tm.EnemyTag)
+        {
+            return tm.PlayerTag;
+        }
+        else
+        {
+            return "tag unknown";
         }
     }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        print("dynamic collision occurring");
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+    //    print(System.String.Format("collider colliding with {0}: {1} of {2}", name, collision.name, collision.transform.root.name));
+
+        //weapon tag is stored in parent of hitboxes with weapon script object
+        if (collision.gameObject != collision.transform.root.gameObject)
+        {
+            if (collision.transform.parent.tag == tm.WeaponTag && collision.gameObject.transform.root.tag == GetOppositeTag())
+            {
+                Weapon attackingWeapon = collision.GetComponentInParent<Weapon>();
+                //TODO: code shield hitbox interaction
+                //if collider overlaps with shield collider and not behind shield collider, reduce damage
+                float damage = Shield(attackingWeapon.damage);
+                SetClip(soundInfo.hitSound, volume:soundInfo.hitVolume);
+                PlayClip();
+                health.TakeDamage(damage);
+                Debug.Log(name + " hit by " + attackingWeapon.transform.parent.name);
+                print(collision.gameObject.name);
+                if (attackingWeapon.knockback)
+                {
+                    StopAllCoroutines();
+                    print(name + "knocked back by" + attackingWeapon.transform.parent.name);
+                    rb.bodyType = RigidbodyType2D.Dynamic;
+                    attackingWeapon.Launch(rb);
+                    //TODO: make launching work
+                }
+            }
+        }
+
+
+    }
+
+    float Shield(float damage)
+    {
+        
+        if (shielding)
+        {
+            damage = damage - damage * shield.def;
+        }
+        return damage;
+    }
+
+    //public virtual void OnTriggerEnter2D(Collider2D collision)
+    //{
+
+
+    //    if(collision.gameObject.tag == tm.WeaponTag && collision.gameObject.transform.parent.tag == tm.EnemyTag)
+    //    {
+    //        Weapon attackingWeapon = collision.GetComponent<Weapon>();
+            
+            
+    //    }
+    //}
 
     public virtual void Flip()
     {
@@ -245,6 +343,12 @@ public class CharacterBehavior : MonoBehaviour {
             foreach (SpriteRenderer hitboxSprite in hitboxSprites)
             {
                 hitboxSprite.flipX = !hitboxSprite.flipX;
+            }
+            foreach(Collider2D hitbox in attackHitBoxes)
+            {
+                //print(string.Format("{0} offset before: {1}", hitbox.name, hitbox.offset));
+                hitbox.offset = new Vector2(hitbox.offset.x * -1, hitbox.offset.y);
+                //print(string.Format("{0} offset after: {1}", hitbox.name, hitbox.offset));
             }
             //Debug.Log("before:" + weapon.transform.position.x.ToString());
             weaponBufferX = weaponBufferX * -1;

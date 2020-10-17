@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour {
         controls.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
         controls.Player.Charge.started += ctx => Charge();
         controls.Player.Charge.canceled += ctx => EndCharge();
+        controls.Player.Shield.started += ctx => RaiseShield();
  
     }
     void Start()
@@ -67,6 +68,15 @@ public class PlayerController : MonoBehaviour {
 
     }
 
+    void RaiseShield()
+    {
+        cb.anim.SetTrigger("RaiseShield");
+        
+    }
+    void LowerShield()
+    {
+        cb.anim.SetTrigger("LowerShield");
+    }
     void OnEnable()
     {
         controls.Enable();

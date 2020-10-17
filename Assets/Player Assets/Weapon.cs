@@ -10,18 +10,13 @@ public class Weapon : MonoBehaviour
     float baseDamage;
     public bool knockback;
     public float knockbackForce = 100;
-    private bool active = false;
-    public bool Active
-    {
-        get { return active; }
-        set { active = value; }
-    }//boolean to determine whether the weapon is active all the time
     [SerializeField]
     Color clashColor = Color.yellow;
     Color normalColor;
     SpriteRenderer spriteRenderer;
     private void Start()
     {
+        
         spriteRenderer= GetComponent<SpriteRenderer>();
         normalColor = spriteRenderer.color;
         anim = GetComponent<Animator>();
@@ -48,7 +43,6 @@ public class Weapon : MonoBehaviour
     public void Clash()
     {
         StartCoroutine(UseClashColor());
-        active = false;
         SendMessageUpwards("OnClash");
         print(string.Format("{0} weapon clashing!", transform.root.name));
 
@@ -56,20 +50,38 @@ public class Weapon : MonoBehaviour
     }
     private void Update()
     {
-        print(string.Format("{0} weapon active status: {1}", transform.root.name, active));
+    }
+    public static IEnumerator LaunchRB(Vector2 dir, Rigidbody2D rigidbody,float knockbackForce)
+    {
+        rigidbody.bodyType = RigidbodyType2D.Dynamic;
+        rigidbody.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
+        yield return new WaitForSeconds(0.2f);
+        float elapse = 0;
+        while(rigidbody.velocity.magnitude > 0.2)
+        {
+            //print(rigidbody.velocity);
+            if(elapse > 5)
+            {
+                break;
+
+            }
+            elapse += Time.deltaTime;
+            yield return null;
+        }
+        rigidbody.bodyType = RigidbodyType2D.Kinematic;
     }
     public void Launch(Rigidbody2D rigidbody)
     {
-        //print(rigidbody.name);
+//        print(rigidbody.name);
         Vector2 dir = (rigidbody.transform.position - transform.position).normalized;
+        //print(dir);
         dir.y = 0;
-        rigidbody.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
+        StartCoroutine(LaunchRB(dir, rigidbody, knockbackForce));
         //launch back with force!
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (active)
-        {
+       
             if (collision.GetComponentInParent<Weapon>())
             {
                 //weapon clashes cause both weapons to Clash, deactivating them and activating the clash animation of the character with that weapon
@@ -77,6 +89,6 @@ public class Weapon : MonoBehaviour
                 collision.GetComponentInParent<Weapon>().Clash();
                 Clash();
             }
-        }
+        
     }
 }

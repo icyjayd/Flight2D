@@ -61,8 +61,10 @@ public class EnemyController : MonoBehaviour
     }
     private void FixedUpdate()
     {
+
+  
+            cb.Move(dir);
         
-        cb.Move(dir);
     }
     RangeState GetState()
     {
@@ -128,7 +130,7 @@ public class EnemyController : MonoBehaviour
        
         while (playerDistX > dist || playerYDist > maxYDist)
         {
-            print("approaching");
+            //print("approaching");
 
             ApproachPlayer();
             yield return null;
@@ -156,7 +158,7 @@ public class EnemyController : MonoBehaviour
         }
         else
         {
-            print("moving");
+           // print("moving");
             attackBias -=   0.1f;
             StartCoroutine(FollowPath(path));
         }
@@ -168,7 +170,6 @@ public class EnemyController : MonoBehaviour
         
         float elapsedTime = 0;
 
-        cb.weapon.Active = true;
         yield return new WaitForSeconds(Time.deltaTime * 2);
         int lim = 3;
         int i = 0;
@@ -212,7 +213,7 @@ public class EnemyController : MonoBehaviour
         float pastDurationSum = 0;
         while (elapsedTime <= totalDuration)
         {
-            print("following movement path");
+           // print("following movement path");
 
             elapsedTime += Time.deltaTime;
             //if the difference between the elapsed time and the total duration of each segment thus far is greater than the current duration
