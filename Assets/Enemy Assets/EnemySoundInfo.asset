@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c7e0787163848c646874e944e0c6e875, type: 3}
-  m_Name: PlayerSoundInfo
+  m_Name: EnemySoundInfo
   m_EditorClassIdentifier: 
   comboSound: {fileID: 8300000, guid: b50fac2b72947984e9519140bc09a65c, type: 3}
   hitSound: {fileID: 8300000, guid: 2252922e032d7354f8c3a11240070910, type: 3}
   comboStart: 0.2
   comboStop: 0
-  comboVolume: 0.75
-  comboPitch: 1
+  comboVolume: 1.5
+  comboPitch: 2
   hitStart: 0
   hitStop: 0
-  hitVolume: 0.4
-  hitPitch: 1
+  hitVolume: 0.5
+  hitPitch: 2
   combo: combo
   hit: hit

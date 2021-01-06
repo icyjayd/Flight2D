@@ -4,17 +4,27 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
 
-    public static GameManager gm;
-    public PlayerController player;
+    private static GameManager gm;
+    public static GameManager GM { get { return gm; } }
+    public CharacterBehavior playerCB;
+    public Transform playerTransform;
 	// Use this for initialization
 	void Awake () {
-        player = GameObject.FindObjectOfType<PlayerController>();
+        playerCB = GameObject.FindObjectOfType<CharacterBehavior>();
         QualitySettings.vSyncCount = 0;
-        gm = this;
+        if (gm != null && gm != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            gm = this;
+        }
+        playerTransform = playerCB.transform;
 	}
 
     public Transform GetPlayerTransform() {
-        return player.transform;
+        return playerCB.transform;
     }
 	// Update is called once per frame
 	void Update () {

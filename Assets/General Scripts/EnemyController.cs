@@ -38,7 +38,7 @@ public class EnemyController : MonoBehaviour
     void Start()
     {
         cb = GetComponent<EnemyBehavior>();
-        playerTransform = cb.gm.GetPlayerTransform();
+        playerTransform = GameManager.GM.playerTransform;
         path = GetComponentInChildren<LineSegment>();
         aggression = (Random.Range(0, 1) <= attackOdds);
         StartCoroutine(Approach());
@@ -180,6 +180,7 @@ public class EnemyController : MonoBehaviour
             if (!cb.anim.GetBool("Attack"))
             {
                 i += 1;
+                
                 cb.anim.SetTrigger("Attack");
                 yield return null;
             }

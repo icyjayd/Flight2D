@@ -19,7 +19,7 @@ public class EnemyBehavior : CharacterBehavior {
     // Use this for initialization
     new void Start () {
         base.Start();
-        playerTransform = gm.GetPlayerTransform();
+        playerTransform = GameManager.GM.playerTransform;
 	}
 
 

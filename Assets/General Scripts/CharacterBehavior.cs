@@ -5,13 +5,19 @@ using UnityEngine;
 /// This class is meant to have actions which are usable by all characters, such as movement, attack, and basic rigidbody initialization.
 /// </summary>
 [RequireComponent(typeof(Health))]
+[RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class CharacterBehavior : MonoBehaviour {
     [SerializeField]
-    private float speedBuffer = 500;
+    [Tooltip("Multiplier for speed value (higher = faster); good value is 30")]
+    private float speedAmplifier = 40; 
 
     public float xSpeed = 10; //speed moving left and right
     public float ySpeed = 10;// speed moving up and down
-    public float dashModifier = 2; //speed increase by dashing
+    [Tooltip("Multiplier for Dash speed - a good value is 1.5x")]
+    public float dashMultiplier = 2; //speed increase by dashing
+    [Tooltip("Multiplier for speed while attacking")]
+    public float attackingMovementSpeedMultiplier;
     public float smoothing = 0.5f;
     public bool facingRight, attacking = false, charging = false, stunned = false;
     bool dashing;
@@ -36,16 +42,26 @@ public class CharacterBehavior : MonoBehaviour {
 
 
     //possibly temporary variables for setup
+    [SerializeField]
+    float iFrameDuration = 1;
+    int flickersPerSecond = 16;
     public SpriteRenderer[] hitboxSprites;
     float weaponBufferX;
     public Collider2D[] attackHitBoxes;
     [SerializeField]
     bool shielding = false;
+    [SerializeField]
+    bool iFrames = false;
     public Shield shield;   
     Color chargeColor;
+    [SerializeField]
+    [Tooltip("Color to flicker to during iframes")]
+    Color damageFlickerColor;
+    [SerializeField]
+    Color normalSpriteColor;
     private void Awake()
     {
-        gm = FindObjectOfType<GameManager>();
+        
         rb = GetComponent<Rigidbody2D>();
         tm = FindObjectOfType<TagManager>();
         shield = GetComponentInChildren<Shield>(includeInactive: true);
@@ -66,7 +82,8 @@ public class CharacterBehavior : MonoBehaviour {
         sp = GetComponent<SpriteRenderer>();
         weapon = GetComponentInChildren<Weapon>();
         attackHitBoxes = weapon.GetComponentsInChildren<Collider2D>(includeInactive:true);
-        audioSource = GetComponent<AudioSource>(); 
+        audioSource = GetComponent<AudioSource>();
+        soundInfo.BuildDict();
        
 
         //hitboxSprites = weapon.GetComponentsInChildren<SpriteRenderer>();
@@ -105,12 +122,22 @@ public class CharacterBehavior : MonoBehaviour {
     //{
     //    print(gm);
     //}
-    public virtual void Move(Vector2 input, float dash = 1, bool backwards = false)
+    public virtual void Move(Vector2 input, bool dash = false, bool backwards = false)
     {
         if (!stunned && rb.bodyType == RigidbodyType2D.Kinematic)
         {
+            float dashMult = 1;
+            float attackMult = 1;
+            if (dash)
+            {
+                dashMult = dashMultiplier;
+                
+            }
+            if (attacking){
+                attackMult = attackingMovementSpeedMultiplier; 
+            }
             Vector2 pos = new Vector2(transform.position.x, transform.position.y);
-            Vector2 dir = input * dash * speedBuffer * Time.fixedDeltaTime;
+            Vector2 dir = input * dashMult * speedAmplifier *  attackMult * Time.fixedDeltaTime;
             distance = dir.magnitude;
             int results = rb.Cast(dir.normalized, hit, dir.magnitude * 4 - 0.01f);
             if (results > 0)
@@ -186,7 +213,7 @@ public class CharacterBehavior : MonoBehaviour {
                 attacking = true;
                 weapon.anim.SetTrigger("Attack");
                 anim.SetTrigger("Attack");
-                SetClip(soundInfo.comboSound, soundInfo.comboStart, volume:soundInfo.comboVolume);
+                SetClip(soundInfo.combo);
 
 
             }
@@ -202,11 +229,13 @@ public class CharacterBehavior : MonoBehaviour {
         audioSource.Play();
 
     }
-    void SetClip(AudioClip clip, float time = 0, float volume = 1)
+    public void SetClip(string clipName)
     {
-        audioSource.clip = clip;
-        audioSource.time = time;
-        audioSource.volume = volume;
+        SoundMeta meta = soundInfo.values[clipName];
+        audioSource.clip = meta.Clip;
+        audioSource.time = meta.Start;
+        audioSource.volume = meta.Volume;
+        audioSource.pitch = meta.Pitch;
     }
     public void Shoot()
     {
@@ -277,36 +306,59 @@ public class CharacterBehavior : MonoBehaviour {
     {
         print("dynamic collision occurring");
     }
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
     //    print(System.String.Format("collider colliding with {0}: {1} of {2}", name, collision.name, collision.transform.root.name));
 
         //weapon tag is stored in parent of hitboxes with weapon script object
         if (collision.gameObject != collision.transform.root.gameObject)
         {
+             //if
             if (collision.transform.parent.tag == tm.WeaponTag && collision.gameObject.transform.root.tag == GetOppositeTag())
             {
-                Weapon attackingWeapon = collision.GetComponentInParent<Weapon>();
-                //TODO: code shield hitbox interaction
-                //if collider overlaps with shield collider and not behind shield collider, reduce damage
-                float damage = Shield(attackingWeapon.damage);
-                SetClip(soundInfo.hitSound, volume:soundInfo.hitVolume);
-                PlayClip();
-                health.TakeDamage(damage);
-                Debug.Log(name + " hit by " + attackingWeapon.transform.parent.name);
-                print(collision.gameObject.name);
-                if (attackingWeapon.knockback)
+                if (!iFrames)
                 {
-                    StopAllCoroutines();
-                    print(name + "knocked back by" + attackingWeapon.transform.parent.name);
-                    rb.bodyType = RigidbodyType2D.Dynamic;
-                    attackingWeapon.Launch(rb);
-                    //TODO: make launching work
+                    Weapon attackingWeapon = collision.GetComponentInParent<Weapon>();
+                    //TODO: code shield hitbox interaction
+                    //if collider overlaps with shield collider and not behind shield collider, reduce damage
+                    float damage = Shield(attackingWeapon.damage);
+                    SetClip(soundInfo.hit);
+                    PlayClip();
+                    health.TakeDamage(damage);
+                    StartCoroutine(DamageFlicker());
+
+
+                    //Debug.Log(name + " hit by " + attackingWeapon.transform.parent.name);
+                    //print(collision.gameObject.name);
+                    if (attackingWeapon.knockback)
+                    {
+                        //StopAllCoroutines();
+                        print(name + "knocked back by" + attackingWeapon.transform.parent.name);
+                        rb.bodyType = RigidbodyType2D.Dynamic;
+                        attackingWeapon.Launch(rb);
+                        //TODO: make launching work
+                    }
                 }
             }
         }
 
 
+    }
+    IEnumerator DamageFlicker()
+    {
+        float flickerSpeed = 1.0f / flickersPerSecond;
+        StartCoroutine(Helpers.SpriteFlicker(sp, normalSpriteColor, damageFlickerColor, iFrameDuration, flickerSpeed));
+        float elapsed = 0;
+        iFrames = true;
+
+        while (elapsed < iFrameDuration)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+       
+        iFrames = false;
+    
     }
 
     float Shield(float damage)

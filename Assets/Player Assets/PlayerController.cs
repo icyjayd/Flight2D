@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour {
     Action lastMove;
     Rigidbody2D rb;
     private CharacterBehavior cb;
-    public float inputThreshold = .2f, dashMultiplier = 2f;
+    public float inputThreshold = .2f;
     //
     public Queue<Action> inputBuffer;
     public InputMaster controls;
@@ -61,7 +61,7 @@ public class PlayerController : MonoBehaviour {
     // Update is called once per frame
     void FixedUpdate()
     {
-        cb.Move(movement, Dash(dash));
+        cb.Move(movement, dash);
         
         //rb.MovePosition(((new Vector2 (xMove, yMove) * speedBuffer * Time.fixedDeltaTime) + new Vector2(transform.position.x, transform.position.y)));
 
@@ -85,18 +85,18 @@ public class PlayerController : MonoBehaviour {
     {
         controls.Disable();
     }
-    float Dash(bool pressed)
-    {
-        if (pressed)
-        {
-            return dashMultiplier;
+    //float Dash(bool pressed)
+    //{
+    //    if (pressed)
+    //    {
+    //        return cb.dashMultiplier;
 
 
-        }
-        else{
-            return 1f; 
-        }
-    }
+    //    }
+    //    else{
+    //        return 1f; 
+    //    }
+    //}
 
     void Charge()
     {

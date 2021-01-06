@@ -23,7 +23,7 @@ public class CamFollow : MonoBehaviour
     {
         //print(SystemInfo.graphicsDeviceName);
         // Setting up the reference.
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        player = GameManager.GM.playerTransform;
         playerRB = player.GetComponent<Rigidbody2D>();
         playerPos = player.position;
         camPos = transform.position;
@@ -45,11 +45,11 @@ public class CamFollow : MonoBehaviour
 
     private void Update()
     {
-
-
+    
 
     }
     private void FixedUpdate() {
+
         camPos = transform.position;
         playerPos = player.position;
 

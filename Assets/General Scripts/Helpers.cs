@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-//using UnityEngine;
+using UnityEngine;
 
 
-    public static class HelperFunctions : object
+    public static class Helpers: object
     {
         public static float Sign(float num)
         {
@@ -37,7 +37,32 @@ using System.Collections.Generic;
 
         }
 
+        public static IEnumerator SpriteFlicker(SpriteRenderer sp, Color normalColor, Color flickerColor, float duration, float flickerSpeed = 1f)
+        {
+            float elapsedTime = 0;
+            float flickerTime = 0;
+            int i = 1;
+            Color[] colors = { normalColor, flickerColor };
+            sp.color = flickerColor;
+            while (elapsedTime < duration) {
+                //Debug.Log("flicker time: " + flickerTime + ", i: " + i);
+
+                elapsedTime += Time.deltaTime;
+                flickerTime += Time.deltaTime;
+                if (flickerTime >= flickerSpeed)
+                {
+                    flickerTime = 0;
+                    i += 1;
+                    sp.color = colors[i%colors.Length];
+
+
+                }
+                yield return null;
+            }
+            sp.color = normalColor;
+        }
     }
+
 
 
 
