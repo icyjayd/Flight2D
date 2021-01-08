@@ -18,7 +18,11 @@ public class CamFollow : MonoBehaviour
     private Rigidbody2D playerRB;
     public float smoothTime = 1;
 
+    //new camera attempt
+    float xDelta;
+    float yDelta;
 
+    public float maxDistanceDelta;
     private void Awake()
     {
         //print(SystemInfo.graphicsDeviceName);
@@ -27,70 +31,114 @@ public class CamFollow : MonoBehaviour
         playerRB = player.GetComponent<Rigidbody2D>();
         playerPos = player.position;
         camPos = transform.position;
+
     }
 
 
     private bool CheckXMargin()
     {
         // Returns true if the distance between the camera and the player in the x axis is greater than the x margin.
-        return Mathf.Abs(transform.position.x - player.position.x) > xMargin;
+        return Mathf.Abs(transform.position.x - player.position.x) >= xMargin;
     }
 
 
     private bool CheckYMargin()
     {
         // Returns true if the distance between the camera and the player in the y axis is greater than the y margin.
-        return Mathf.Abs(transform.position.y - player.position.y) > yMargin;
+        return Mathf.Abs(transform.position.y - player.position.y) >= yMargin;
     }
 
     private void Update()
     {
-    
-
-    }
-    private void FixedUpdate() {
-
         camPos = transform.position;
         playerPos = player.position;
 
 
     }
+    private void FixedUpdate() {
+
+        xDelta = Mathf.Clamp(playerPos.x-camPos.x, -xMargin, xMargin);
+        yDelta = Mathf.Clamp(playerPos.y-camPos.y, -yMargin, yMargin);
+
+
+    }
     private void LateUpdate()
     {
+        //TrackPlayer();
 
-        TrackPlayer();
+        Follow();
+
+
 
     }
 
     private void Follow() {
-        transform.position = Vector3.SmoothDamp(transform.position, player.position, ref velocity, smoothTime);
+
+
+
+        //The camera should only move when the player is beyond the boundaries 
+        //If the player breaches the boundaries, the camera should follow at no more than a distance of 
+
+        float newX = camPos.x ;
+        if (CheckXMargin())
+        {
+            float xSign = (playerPos.x - camPos.x) / (Mathf.Abs(playerPos.x - camPos.x));
+
+
+            newX = playerPos.x - xMargin * xSign;
+        }
+
+        float newY = camPos.y;
+        if (CheckYMargin())
+        {
+            float ySign = (playerPos.y - camPos.y) / (Mathf.Abs(playerPos.y - camPos.y));
+
+
+            newY = playerPos.y - yMargin * ySign;
+        }
+        //TODO: add tweening to maxDistanceDelta
+        transform.position = Vector3.MoveTowards(transform.position, new Vector3(newX, newY, transform.position.z), maxDistanceDelta * Time.fixedDeltaTime);
+
+        //transform.position = Vector3.SmoothDamp(transform.position, player.position, ref velocity, smoothTime);
     }
     private void TrackPlayer()
     {
+
+        //the camera should not move until it is needed to
+        //therefore there must be a max delta
+
         // By default the target x and y coordinates of the camera are it's current x and y coordinates.
         float targetX = transform.position.x;
         float targetY = transform.position.y;
 
         // If the player has moved beyond the x margin...
         if (CheckXMargin())
-        {
+        {//get the sign of 
+            float xSign = (playerPos.x - camPos.x) / (Mathf.Abs(playerPos.x - camPos.x));
+
             // ... the target x coordinate should be a Lerp between the camera's current x position and the player's current x position.
-            targetX = Mathf.Lerp(camPos.x, playerPos.x, xSmooth * Time.fixedDeltaTime);
+            targetX = playerPos.x - xMargin * xSign; 
+
+            targetX = Mathf.Lerp(camPos.x  , playerPos.x - xMargin * xSign,  xSmooth * Time.deltaTime);
         }
+        //
 
         // If the player has moved beyond the y margin...
         if (CheckYMargin())
         {
+            float ySign = (playerPos.y - camPos.y) / (Mathf.Abs(playerPos.y - camPos.y));
             // ... the target y coordinate should be a Lerp between the camera's current y position and the player's current y position.
-            targetY = Mathf.Lerp(camPos.y, playerPos.y, ySmooth * Time.fixedDeltaTime);
+            targetY = playerPos.y - yMargin * ySign;
+            targetY = Mathf.Lerp(camPos.y  , playerPos.y - yMargin * ySign , ySmooth * Time.deltaTime);
         }
-
+        //+(playerPos.y - camPos.y)
         // The target x and y coordinates should not be larger than the maximum or smaller than the minimum.
         targetX = Mathf.Clamp(targetX, minXAndY.x, maxXAndY.x);
         targetY = Mathf.Clamp(targetY, minXAndY.y, maxXAndY.y);
-       
+
         // Set the camera's position to the target position with the same z component.
-        transform.position = new Vector3(targetX, targetY, transform.position.z);
+        transform.position = new Vector3 (targetX, targetY, transform.position.z);
+
     }
     private void TrackPlayerOld() {
 

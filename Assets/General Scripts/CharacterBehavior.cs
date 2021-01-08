@@ -22,8 +22,6 @@ public class CharacterBehavior : MonoBehaviour {
     public bool facingRight, attacking = false, charging = false, stunned = false;
     bool dashing;
     public Rigidbody2D rb;
-    public GameManager gm;
-    public TagManager tm;
     int comboCount = 0;
     float distance = 0;
     public Animator anim;
@@ -44,6 +42,7 @@ public class CharacterBehavior : MonoBehaviour {
     //possibly temporary variables for setup
     [SerializeField]
     float iFrameDuration = 1;
+    [SerializeField]
     int flickersPerSecond = 16;
     public SpriteRenderer[] hitboxSprites;
     float weaponBufferX;
@@ -63,7 +62,6 @@ public class CharacterBehavior : MonoBehaviour {
     {
         
         rb = GetComponent<Rigidbody2D>();
-        tm = FindObjectOfType<TagManager>();
         shield = GetComponentInChildren<Shield>(includeInactive: true);
         weapon = GetComponentInChildren<Weapon>();
         //attackHitBoxes = new Collider[4];
@@ -104,7 +102,7 @@ public class CharacterBehavior : MonoBehaviour {
         {
             col.gameObject.SetActive(false);
         }
-        print("OnClash triggered");
+  //      print("OnClash triggered");
         anim.SetTrigger("Clash");
         stunned = true;
         //start clashing animation
@@ -222,11 +220,14 @@ public class CharacterBehavior : MonoBehaviour {
 
     public void PlayClip()
     {
-        if (audioSource.isPlaying)
+        if (gameObject.activeInHierarchy)
         {
-            audioSource.Stop();
+            if (audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
+            audioSource.Play();
         }
-        audioSource.Play();
 
     }
     public void SetClip(string clipName)
@@ -289,13 +290,13 @@ public class CharacterBehavior : MonoBehaviour {
     }
     public string GetOppositeTag()
     {
-        if (tag == tm.PlayerTag)
+        if (tag == TagManager.TM.PlayerTag)
         {
-            return tm.EnemyTag;
+            return TagManager.TM.EnemyTag;
         }
-        else if (tag == tm.EnemyTag)
+        else if (tag == TagManager.TM.EnemyTag)
         {
-            return tm.PlayerTag;
+            return TagManager.TM.PlayerTag;
         }
         else
         {
@@ -306,15 +307,14 @@ public class CharacterBehavior : MonoBehaviour {
     {
         print("dynamic collision occurring");
     }
-    private void OnTriggerStay2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-    //    print(System.String.Format("collider colliding with {0}: {1} of {2}", name, collision.name, collision.transform.root.name));
-
+        //    print(System.String.Format("collider colliding with {0}: {1} of {2}", name, collision.name, collision.transform.root.name));
         //weapon tag is stored in parent of hitboxes with weapon script object
         if (collision.gameObject != collision.transform.root.gameObject)
         {
-             //if
-            if (collision.transform.parent.tag == tm.WeaponTag && collision.gameObject.transform.root.tag == GetOppositeTag())
+            //if the colliding wepaon is hitting you
+            if (collision.transform.parent.tag == TagManager.TM.WeaponTag && collision.gameObject.transform.root.tag == GetOppositeTag())
             {
                 if (!iFrames)
                 {
@@ -325,7 +325,11 @@ public class CharacterBehavior : MonoBehaviour {
                     SetClip(soundInfo.hit);
                     PlayClip();
                     health.TakeDamage(damage);
-                    StartCoroutine(DamageFlicker());
+
+                    if (gameObject.activeInHierarchy)
+                    {
+                        StartCoroutine(DamageFlicker());
+                    }
 
 
                     //Debug.Log(name + " hit by " + attackingWeapon.transform.parent.name);
@@ -343,9 +347,12 @@ public class CharacterBehavior : MonoBehaviour {
         }
 
 
+
     }
     IEnumerator DamageFlicker()
     {
+
+
         float flickerSpeed = 1.0f / flickersPerSecond;
         StartCoroutine(Helpers.SpriteFlicker(sp, normalSpriteColor, damageFlickerColor, iFrameDuration, flickerSpeed));
         float elapsed = 0;

@@ -393,7 +393,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!114 &699362375
 MonoBehaviour:
@@ -496,7 +496,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!114 &1055909101
 MonoBehaviour:
@@ -727,13 +727,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7648a705a1715cb4291452add9369364, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xMargin: 3
-  yMargin: 3
-  xSmooth: 8
-  ySmooth: 8
+  xMargin: 4
+  yMargin: 2
+  xSmooth: 100
+  ySmooth: 100
   maxXAndY: {x: 1000, y: 1000}
   minXAndY: {x: -10000, y: -1000}
-  smoothTime: 0.15
+  smoothTime: 1.11
+  maxDistanceDelta: 100
 --- !u!1 &1840486598
 GameObject:
   m_ObjectHideFlags: 0
@@ -858,10 +859,20 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2938861122301393166, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2938861122313782060, guid: 2a88daf4a3215774d98f68ab50cebce3,
         type: 3}
       propertyPath: m_Name
       value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 2938861122313782060, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2938861122314280716, guid: 2a88daf4a3215774d98f68ab50cebce3,
         type: 3}
@@ -958,6 +969,11 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 0.5804142
       objectReference: {fileID: 0}
+    - target: {fileID: 2938861122543482791, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: m_Name
+      value: enemy test sword
+      objectReference: {fileID: 0}
     - target: {fileID: 2938861123231650338, guid: 2a88daf4a3215774d98f68ab50cebce3,
         type: 3}
       propertyPath: soundInfo
@@ -1008,6 +1024,32 @@ PrefabInstance:
         type: 3}
       propertyPath: dashMultiplier
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2938861123231650338, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: iFrameDuration
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2938861123231650338, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: damageFlickerColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2938861123231650338, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: flickersPerSecond
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2938861123231650339, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: deathSprite
+      value: 
+      objectReference: {fileID: 4174057679233801782, guid: 07284b5bc1d3ceb4ea9df894ba82c361,
+        type: 3}
+    - target: {fileID: 2938861123231650339, guid: 2a88daf4a3215774d98f68ab50cebce3,
+        type: 3}
+      propertyPath: maxHealth
+      value: 20
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2a88daf4a3215774d98f68ab50cebce3, type: 3}
@@ -1078,6 +1120,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 8595529602061687049, guid: 198e0167aa1879b4f872cc7e23ad64f3,
+        type: 3}
+      propertyPath: deathSprite
+      value: 
+      objectReference: {fileID: 4174057679233801782, guid: 07284b5bc1d3ceb4ea9df894ba82c361,
+        type: 3}
     - target: {fileID: 8595529602061687055, guid: 198e0167aa1879b4f872cc7e23ad64f3,
         type: 3}
       propertyPath: m_Camera
@@ -1158,6 +1206,11 @@ PrefabInstance:
         type: 3}
       propertyPath: damageFlickerColor.a
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8595529602061687057, guid: 198e0167aa1879b4f872cc7e23ad64f3,
+        type: 3}
+      propertyPath: dashMultiplier
+      value: 1.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 198e0167aa1879b4f872cc7e23ad64f3, type: 3}

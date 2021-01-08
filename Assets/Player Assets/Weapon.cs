@@ -43,8 +43,9 @@ public class Weapon : MonoBehaviour
     public void Clash()
     {
         StartCoroutine(UseClashColor());
-        SendMessageUpwards("OnClash");
-        print(string.Format("{0} weapon clashing!", transform.root.name));
+        
+        SendMessageUpwards("OnClash", options:SendMessageOptions.DontRequireReceiver); 
+  //      print(string.Format("{0} weapon clashing!", transform.root.name));
 
 
     }
@@ -81,7 +82,9 @@ public class Weapon : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-       
+
+        if (collision.transform.root.gameObject.activeInHierarchy)
+        {
             if (collision.GetComponentInParent<Weapon>())
             {
                 //weapon clashes cause both weapons to Clash, deactivating them and activating the clash animation of the character with that weapon
@@ -89,6 +92,7 @@ public class Weapon : MonoBehaviour
                 collision.GetComponentInParent<Weapon>().Clash();
                 Clash();
             }
+        }
         
     }
 }
