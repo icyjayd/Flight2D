@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
     //
     public Queue<Action> inputBuffer;
     public InputMaster controls;
+    GameObject dashEffect;
     
     private void Awake()
     {
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
         cb = GetComponent<CharacterBehavior>();
         inputBuffer = new Queue<Action>();
+        dashEffect = transform.Find("dash effect").gameObject;
 
     }
     private void Update()
@@ -106,21 +108,29 @@ public class PlayerController : MonoBehaviour {
         {
             print("dashing");
             dash = true;
+            cb.AlignDashEffect(true);
             charging = false;
         }
         else
         {
             print("charging");
             dash = false;
+            cb.AlignDashEffect(false);
+       
             charging = true;
 
         }
+        cb.anim.SetBool("Dashing", dash);
+
     }
 
     void EndCharge()
     {
         dash = false;
         charging = false;
+        cb.AlignDashEffect(false);
+        cb.anim.SetBool("Dashing", dash);
+
     }
     void ProcessInput(Action action)//takes all input and adds it to the queue, catching held movement and new movement;
     {

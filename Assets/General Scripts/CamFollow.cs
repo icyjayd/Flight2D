@@ -22,6 +22,10 @@ public class CamFollow : MonoBehaviour
     float xDelta;
     float yDelta;
 
+    [SerializeField]
+    float startSize;
+    [SerializeField]
+    float endSize;
     public float maxDistanceDelta;
     private void Awake()
     {

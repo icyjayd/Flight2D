@@ -58,6 +58,14 @@ public class CharacterBehavior : MonoBehaviour {
     Color damageFlickerColor;
     [SerializeField]
     Color normalSpriteColor;
+    SpriteRenderer dashSP;
+    /// <summary>
+    /// determines whether the last dash was 
+    /// </summary>
+    //bool lastDash;
+
+    Vector2 lastMove;
+
     private void Awake()
     {
         
@@ -94,6 +102,11 @@ public class CharacterBehavior : MonoBehaviour {
         anim = GetComponent<Animator>();
         health = GetComponent<Health>();
         weaponBufferX = weapon.transform.position.x - transform.position.x;
+        if (tag == TagManager.TM.PlayerTag)
+        {
+            dashSP = transform.Find("dash effect").GetComponent<SpriteRenderer>();
+            dashSP.gameObject.SetActive(false);
+        }
     }
     public void OnClash()///if you change this, make sure you change the Weapon.cs call!
 
@@ -128,6 +141,7 @@ public class CharacterBehavior : MonoBehaviour {
             float attackMult = 1;
             if (dash)
             {
+                
                 dashMult = dashMultiplier;
                 
             }
@@ -135,7 +149,32 @@ public class CharacterBehavior : MonoBehaviour {
                 attackMult = attackingMovementSpeedMultiplier; 
             }
             Vector2 pos = new Vector2(transform.position.x, transform.position.y);
-            Vector2 dir = input * dashMult * speedAmplifier *  attackMult * Time.fixedDeltaTime;
+            float dirX = 0;
+            if (dash)
+            {
+                if (input.x != 0)
+                {
+                    dirX = input.x / (Mathf.Abs(input.x)) * speedAmplifier * attackMult * Time.fixedDeltaTime * dashMult;
+
+                }
+                else
+
+                {
+                    //keep dashing even when directional stick isn't held
+                    dirX =  1 * speedAmplifier * attackMult * Time.fixedDeltaTime * dashMult;
+                    //facing right check - right goes from 0-100
+
+                    if (sp.flipX) {
+                        dirX = dirX * -1;
+                    }
+                }
+            }
+            else
+            {
+                dirX = input.x * speedAmplifier * attackMult * Time.fixedDeltaTime;
+            }
+            float dirY = input.y * speedAmplifier * attackMult * Time.fixedDeltaTime;
+            Vector2 dir = new Vector2(dirX, dirY);
             distance = dir.magnitude;
             int results = rb.Cast(dir.normalized, hit, dir.magnitude * 4 - 0.01f);
             if (results > 0)
@@ -149,7 +188,14 @@ public class CharacterBehavior : MonoBehaviour {
                 distance = 0;
                 //rb.velocity = Vector2.zero;
             }
-            rb.MovePosition(pos + dir * distance);
+            Vector2 movement = pos + dir * distance;
+            if (float.IsNaN(movement.x)||float.IsNaN(movement.y)){
+                print(lastMove);
+
+
+            }
+            lastMove = movement;
+            rb.MovePosition(movement);
             //Collider2D[] cols = 
             //rb.velocity = new Vector2(moveX, moveY) * dash * speedBuffer * Time.fixedDeltaTime;
             // rb.AddForce(new Vector2(moveX, moveY));
@@ -385,11 +431,19 @@ public class CharacterBehavior : MonoBehaviour {
     //    if(collision.gameObject.tag == tm.WeaponTag && collision.gameObject.transform.parent.tag == tm.EnemyTag)
     //    {
     //        Weapon attackingWeapon = collision.GetComponent<Weapon>();
-            
-            
+
+
     //    }
     //}
-
+    /// <summary>
+    /// Potentially temporary variable for aligning dash effect flipX to player sprite flipX 
+    /// </summary>
+    public void AlignDashEffect(bool turnOn)
+    {
+        
+            dashSP.gameObject.SetActive(turnOn);
+            dashSP.flipX = sp.flipX;
+    }
     public virtual void Flip()
     {
         if (sp)
@@ -397,6 +451,13 @@ public class CharacterBehavior : MonoBehaviour {
             // Switch the way the player is labelled as facing.
             facingRight = !facingRight;
             sp.flipX = !sp.flipX;
+            if(tag == TagManager.TM.PlayerTag)
+            {
+                if (dashSP.gameObject.activeInHierarchy)
+                {
+                    dashSP.flipX = sp.flipX;
+                }
+            }
             
             weapon.sp.flipX = !weapon.sp.flipX;
             foreach (SpriteRenderer hitboxSprite in hitboxSprites)
