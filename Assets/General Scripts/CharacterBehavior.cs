@@ -177,13 +177,14 @@ public class CharacterBehavior : MonoBehaviour {
             Vector2 dir = new Vector2(dirX, dirY);
             distance = dir.magnitude;
             int results = rb.Cast(dir.normalized, hit, dir.magnitude * 4 - 0.01f);
+           
             if (results > 0)
             {
                 //print("detected");
                 distance = hit[0].fraction * dir.normalized.magnitude;
             }
             // rb.velocity = dir ;
-            if (distance < 0.01f)
+            if (distance < 0.2f)
             {
                 distance = 0;
                 //rb.velocity = Vector2.zero;
@@ -263,7 +264,7 @@ public class CharacterBehavior : MonoBehaviour {
             }
         }
     }
-
+    //TODO: make consistent
     public void PlayClip()
     {
         if (gameObject.activeInHierarchy)
