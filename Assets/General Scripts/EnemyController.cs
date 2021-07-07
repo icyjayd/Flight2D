@@ -29,6 +29,7 @@ public class EnemyController : MonoBehaviour
     public float playerDistX, playerYDist;
     public float attackOdds = 0.7f;
     public float attackBias = 0f;//used to diminish the odds of too many successive attacks
+    Vector2[] dirs;
     //General notes:
     //RANGES
     //Long range behavior of the basic baddy: approach in "travel mode" then transition to mid range mode 
@@ -37,16 +38,46 @@ public class EnemyController : MonoBehaviour
     //Point blank range: defined as the range in which a melee attack will definitely hit its target unless shielded
     void Start()
     {
+        dirs = new Vector2[16];
         cb = GetComponent<EnemyBehavior>();
         playerTransform = GameManager.GM.playerTransform;
         path = GetComponentInChildren<LineSegment>();
         aggression = (Random.Range(0, 1) <= attackOdds);
-        StartCoroutine(Approach());
-        
+        //        StartCoroutine(Approach());
+        //initialize sixteen directions
+        //1 x with each magnitude and each sign
+        //1 y with each magnitude
+        InitDirs();
+
+
         
     }
-    
 
+    private void InitDirs()
+    {
+
+        float[] mags = new float[4] { -1, -0.5f, 0.5f, 1 };
+        int i = 0;
+        foreach (float mag_x in mags)
+        {
+
+            foreach (float mag_y in mags)
+            {
+                Vector2 vec = new Vector2(mag_x, mag_y);
+                print(vec);
+                dirs[i] = vec;
+
+                i++;
+                print(i);
+
+            }
+        }
+    }
+    Vector3 GetDir()
+    {
+        ///
+        return dir;
+    }
     // Update is called once per frame
     void Update()
     {
