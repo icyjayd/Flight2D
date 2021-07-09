@@ -11,9 +11,11 @@ public class EnemyController : MonoBehaviour
     private float moveX = 0, moveY = 0;
     private bool watching = true;
     [SerializeField]
-    private float meleeRangeThresholdX = 1;
+    private float longRangeThresholdX = 10;
     [SerializeField]
     private float acceleration = 1.1f;
+    [SerializeField]
+    private float meleeRangeThresholdX = 1;
     [SerializeField]
     private float midRangeThresholdX = 5, maxYDist = 0.5f;
     private float pointBlankRange = 0.7f;//TODO: implement this
@@ -21,8 +23,14 @@ public class EnemyController : MonoBehaviour
     [SerializeField]
     RangeState rangeState;
 
+    NPCMovement npcm;
+
     /// possibly temporary variables
     bool aggression = false; //might not use
+
+    //Temporary variable for enemy home position
+    Vector2 startPos;
+    
 
     LineSegment path;
     float approachTime = 0;
@@ -44,35 +52,13 @@ public class EnemyController : MonoBehaviour
         path = GetComponentInChildren<LineSegment>();
         aggression = (Random.Range(0, 1) <= attackOdds);
         //        StartCoroutine(Approach());
-        //initialize sixteen directions
-        //1 x with each magnitude and each sign
-        //1 y with each magnitude
-        InitDirs();
-
+        npcm = GetComponent<NPCMovement>();
+        startPos = new Vector2(transform.position.x, transform.position.y);
 
         
     }
 
-    private void InitDirs()
-    {
 
-        float[] mags = new float[4] { -1, -0.5f, 0.5f, 1 };
-        int i = 0;
-        foreach (float mag_x in mags)
-        {
-
-            foreach (float mag_y in mags)
-            {
-                Vector2 vec = new Vector2(mag_x, mag_y);
-                print(vec);
-                dirs[i] = vec;
-
-                i++;
-                print(i);
-
-            }
-        }
-    }
     Vector3 GetDir()
     {
         ///
@@ -84,6 +70,21 @@ public class EnemyController : MonoBehaviour
         playerDistX = Mathf.Abs(transform.position.x - playerTransform.position.x);
         playerYDist = Mathf.Abs(transform.position.y - playerTransform.position.y);
         rangeState = GetState();
+        if (rangeState == RangeState.PointBlank)
+        {
+            dir = Vector2.zero;
+        }
+        else if (rangeState != RangeState.Out)
+        {
+            npcm.UpdateTargetWeights(playerTransform.position);
+            dir = npcm.GetDir();
+
+
+        }
+        else {
+            npcm.UpdateTargetWeights(startPos);
+            dir = npcm.GetDir();
+        }
         //approachTime += Time.deltaTime;
         //if (approachTime % 10 < 5)
         //{
@@ -91,15 +92,19 @@ public class EnemyController : MonoBehaviour
         //}
     }
     private void FixedUpdate()
+       
     {
-
-  
-            cb.Move(dir);
+         cb.Move(dir);
         
     }
     RangeState GetState()
     {
-        if (playerDistX > midRangeThresholdX || playerYDist > maxYDist)
+        if (playerDistX > longRangeThresholdX)
+        {
+            return RangeState.Out;
+        }
+
+        else if (playerDistX > midRangeThresholdX || playerYDist > maxYDist)
         {
             return RangeState.Long;
         }
