@@ -16,7 +16,12 @@ public class NPCMovement : MonoBehaviour
     public float avoidWeightScaleFactor = 1;
     public float radius = 1;
     Rigidbody2D rb;
+    int curDirIdx;
 
+    private Vector2 curDir;
+    public Vector2 CurDir { get =>curDir; set => curDir = value;}
+
+    float targetSwitchGain;
     [SerializeField]
     int dirNum = 16;
     CompassGizmo compassGizmo;
@@ -95,23 +100,31 @@ public class NPCMovement : MonoBehaviour
       
         ///
         for (int i = 0; i < dirs.Length; i++)
-        {   
-            targetWeights_m[i] = Vector2.Dot(targetDir, dirs[i]);//* targetWeightWeights_m[i];// * targetWeightScaleFactor;
+        {   //TODO: implement distance-based weights of weights
+            float distBuffer = Mathf.Max(0, (radius - Vector2.Distance(new Vector2(transform.position.x, transform.position.y) + dirs[i], target)));
+            print(distBuffer);
+            float dot = Vector2.Dot(targetDir, dirs[i]);
+            float horizontal = 1 - Mathf.Abs(dot);
+            targetWeights_m[i] = dot* targetWeightScaleFactor * horizontal -distBuffer;//* targetWeightWeights_m[i];// * targetWeightScaleFactor;
             //print((i, Vector2.Dot(targetDir, dirs[i])));
         }
         targetWeights_m = NormalizeData(targetWeights_m, 0, 1);
-        int j = 0;
-        foreach(float weight in targetWeights_m)
-        {
-            print((j, weight));
-            j++;
-        }
+        //int j = 0;
+        float maxVal = targetWeights_m.Max();
+        //if the gain in heading is greater than threshold, switch to newest
+
+
+        int maxIdx = Array.IndexOf(targetWeights_m, maxVal);
+        curDir = 
+
+
+        //foreach(float weight in targetWeights_m)
+        //{
+        //    print((j, weight));
+        //    j++;
+        //}
     }
     public Vector2 GetDir()
     {
-        float maxVal = targetWeights_m.Max();
-        int maxIdx = Array.IndexOf(targetWeights_m, maxVal);
-        return dirs[maxIdx];
-
     }
 }

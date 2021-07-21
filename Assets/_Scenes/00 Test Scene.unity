@@ -257,7 +257,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f09092c11ad457a47b57ff1cb60579a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weights: []
 --- !u!82 &605379703
 AudioSource:
   m_ObjectHideFlags: 0
@@ -793,7 +792,7 @@ PrefabInstance:
     - target: {fileID: 2938861123231650338, guid: 2a88daf4a3215774d98f68ab50cebce3,
         type: 3}
       propertyPath: speedAmplifier
-      value: 15
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2938861123231650338, guid: 2a88daf4a3215774d98f68ab50cebce3,
         type: 3}
