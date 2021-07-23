@@ -76,13 +76,13 @@ public class EnemyController : MonoBehaviour
         }
         else if (rangeState != RangeState.Out)
         {
-            npcm.UpdateTargetWeights(playerTransform.position);
+            npcm.UpdateWeights(playerTransform.position);
             dir = npcm.GetDir();
 
 
         }
         else {
-            npcm.UpdateTargetWeights(startPos);
+            npcm.UpdateWeights(startPos);
             dir = npcm.GetDir();
         }
         //approachTime += Time.deltaTime;
